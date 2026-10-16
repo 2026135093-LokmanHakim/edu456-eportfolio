@@ -85,22 +85,40 @@ button{font:inherit;color:inherit}
 .burger{display:none;background:var(--card-bg);border:1px solid var(--card-line);border-radius:12px;width:40px;height:40px;cursor:pointer}
 
 /* ===== Hero ===== */
-.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center;min-height:calc(100vh - 66px);padding:40px 0 60px}
-.hero h1{font-size:clamp(2.2rem,5vw,4.2rem);margin:18px 0 14px;white-space:nowrap}
+.hero{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center;min-height:calc(100vh - 72px);padding:40px 0 80px}
+.pill{display:inline-flex;align-items:center;gap:12px;padding:9px 18px;border-radius:999px;background:var(--card-bg);border:1px solid var(--card-line);
+  font:500 .78rem/1 var(--font-mono);letter-spacing:.32em;text-transform:uppercase;color:#e2e8f0}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:#38bdf8;box-shadow:0 0 10px #38bdf8;animation:blink 2.4s ease-in-out infinite}
+@keyframes blink{50%{opacity:.35}}
+.hero h1{font-size:clamp(2.8rem,6.6vw,6.6rem);line-height:.96;margin:26px 0 22px;letter-spacing:-.01em}
+.hero h1 .l1{display:block;width:fit-content;background:var(--head-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero h1 .l2{display:block;color:#fff}
-.hero .name{font:500 .9rem var(--font-mono);letter-spacing:.3em;color:#94a3b8;text-transform:uppercase}
-.hero .course{margin-top:8px;font:500 .74rem/1.5 var(--font-mono);letter-spacing:.08em;color:#7dd3fc}
-.hero .sub{font:500 clamp(1rem,1.6vw,1.25rem)/1.4 var(--font-display);margin:22px 0 10px;color:#e6e2ff}
-.hero .desc{color:#94a3b8;max-width:54ch;margin-bottom:30px}
-.cta{display:flex;gap:12px;flex-wrap:wrap}
+.hero .name{display:flex;align-items:center;gap:16px;font:700 clamp(1.05rem,1.9vw,1.7rem)/1.25 var(--font-display);letter-spacing:.02em;color:#fff;text-transform:uppercase}
+.hero .name::before{content:"";flex:none;width:52px;height:2px;background:linear-gradient(90deg,#6366f1,#a855f7)}
+.hero .course{margin:10px 0 0 68px;font:500 .74rem/1.5 var(--font-mono);letter-spacing:.08em;color:#7dd3fc}
+.hero .sub{font:600 clamp(1.25rem,2.3vw,2.05rem)/1.25 var(--font-display);margin:28px 0 18px;width:fit-content;
+  background:linear-gradient(90deg,#38bdf8 0%,#818cf8 35%,#a855f7 65%,#ec4899 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .desc{color:#94a3b8;max-width:52ch;margin-bottom:34px;font-size:clamp(1rem,1.25vw,1.18rem);line-height:1.7}
+.cta{display:flex;gap:14px;flex-wrap:wrap}
+.cta .btn{padding:15px 30px;font-size:1.05rem}
+.cta .btn.primary{background:linear-gradient(90deg,#8b5cf6,#6366f1 50%,#3b82f6);box-shadow:0 14px 40px -12px rgba(139,92,246,.9)}
+.cta .btn svg{transition:transform .25s}
+.cta .btn.primary:hover svg{transform:translateX(4px)}
 .orb-wrap{position:relative;aspect-ratio:1/1;width:100%;max-width:560px;justify-self:center}
 #orb{width:100%;height:100%;display:block}
 .float-label{position:absolute;padding:10px 16px;border-radius:14px;font:500 .66rem/1.3 var(--font-mono);letter-spacing:.2em;color:#cbd5e1;border:1px solid var(--card-line);background:rgba(14,12,34,.72);backdrop-filter:blur(10px);animation:bob 6s ease-in-out infinite}
-.float-label b{display:block;font:700 1.35rem/1.2 var(--font-display);letter-spacing:0;color:#fff}
-.float-label.a{left:2%;top:14%}
-.float-label.b{right:2%;bottom:16%;animation-delay:-3s}
+.float-label{padding:14px 20px;border-radius:18px;background:var(--card-bg);box-shadow:var(--card-shadow)}
+.float-label span{display:block;width:fit-content}
+.float-label b{display:block;margin-top:4px;font:700 1.75rem/1.1 var(--font-display);letter-spacing:0;color:#fff}
+.float-label.a span{background:linear-gradient(90deg,#38bdf8,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.float-label.b span{color:#f472b6}
+.float-label.a{left:0;top:10%}
+.float-label.b{right:0;bottom:12%;animation-delay:-3s}
 @keyframes bob{50%{transform:translateY(-10px)}}
-.scroll-hint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font:600 .65rem var(--font-display);letter-spacing:.3em;color:var(--dim)}
+.scroll-hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;
+  font:500 .68rem var(--font-mono);letter-spacing:.4em;color:#64748b;text-decoration:none}
+.scroll-hint svg{animation:nudge 1.8s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateY(5px)}}
 
 /* ===== Sections ===== */
 section.block{padding:96px 0;position:relative}
@@ -303,7 +321,10 @@ input[type=range].rng::-moz-range-thumb{width:16px;height:16px;border:0;border-r
 }
 @media (max-width:760px){
   .hero{grid-template-columns:1fr;min-height:0;padding-top:28px}
-  .hero h1{font-size:clamp(1.6rem,8.2vw,3.4rem)}
+  .hero h1{font-size:clamp(2.2rem,11vw,3.6rem)}
+  .hero .course{margin-left:0}
+  .pill{font-size:.66rem;letter-spacing:.24em}
+  .cta .btn{padding:13px 22px;font-size:.95rem}
   .hero .name{letter-spacing:.12em;font-size:.9rem}
   .orb-wrap{max-width:340px;order:-1;width:92%}
   .float-label{padding:6px 10px;font-size:.6rem}
@@ -351,22 +372,23 @@ input[type=range].rng::-moz-range-thumb{width:16px;height:16px;border:0;border-r
     <div class="wrap" id="top">
       <div class="hero">
         <div>
-          <div class="eyebrow reveal">Student AI Portfolio</div>
-          <h1 class="h-display reveal"><span class="grad-text">EDU456</span><span class="l2">E-PORTFOLIO</span></h1>
+          <div class="pill reveal"><span class="dot" aria-hidden="true"></span>Student AI Portfolio</div>
+          <h1 class="h-display reveal"><span class="l1">EDU456</span><span class="l2">E-PORTFOLIO</span></h1>
           <p class="name reveal">Lokman Hakim bin Yusoff</p>
           <p class="course reveal">EDU456 · Innovative Technologies in Teaching and Learning · ED2422A</p>
           <p class="sub reveal">Exploring Creativity Through Artificial Intelligence</p>
           <p class="desc reveal">A digital showcase of educational and creative projects developed using AI, including visual art, music, video, interactive learning, and online course content.</p>
           <div class="cta reveal">
-            <a class="btn primary" href="#projects">Explore Projects &rarr;</a>
-            <a class="btn" href="#about">About Me</a>
+            <a class="btn primary" href="#projects">Explore Projects <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+            <a class="btn" href="#about"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.3-6 8-6s6.8 2 8 6"/></svg>About Me</a>
           </div>
         </div>
         <div class="orb-wrap" aria-hidden="true">
           <canvas id="orb"></canvas>
-          <div class="float-label a">PROJECTS<b>06</b></div>
-          <div class="float-label b">COURSE<b>EDU456</b></div>
+          <div class="float-label a"><span>PROJECTS</span><b>06</b></div>
+          <div class="float-label b"><span>COURSE</span><b>EDU456</b></div>
         </div>
+        <a class="scroll-hint" href="#about">SCROLL<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
       </div>
     </div>
 
@@ -1006,44 +1028,87 @@ function updateOrbActive(){ orbActive = !homeEl.hidden; }
 (function orb(){
   const cv = $("#orb"), ctx = cv.getContext("2d");
   const small = innerWidth < 760;
-  const N = small ? 70 : 150, LINK = small ? .62 : .5;
+  // low-poly geodesic sphere: fewer vertices, each joined to its nearest neighbours
+  const N = small ? 38 : 46, LINK = small ? .7 : .64;
   const pts = [], ga = Math.PI*(3-Math.sqrt(5));
   for(let i=0;i<N;i++){ const y = 1-(i/(N-1))*2, r = Math.sqrt(1-y*y), th = i*ga; pts.push([Math.cos(th)*r, y, Math.sin(th)*r]); }
   const edges = [];
   for(let i=0;i<N;i++) for(let j=i+1;j<N;j++){
     const dx=pts[i][0]-pts[j][0], dy=pts[i][1]-pts[j][1], dz=pts[i][2]-pts[j][2];
-    if(dx*dx+dy*dy+dz*dz < LINK*LINK*.5) edges.push([i,j]);
+    if(dx*dx+dy*dy+dz*dz < LINK*LINK) edges.push([i,j]);
   }
-  let W=0,H=0,dpr=1, ry=0, rx=.35, tx=.35, ty=0, visible=true;
+  // a few loose "inner" particles floating inside the sphere
+  const inner = Array.from({length: small ? 14 : 24}, ()=>{ const u=Math.random()*2-1, th=Math.random()*6.283, r=.35+Math.random()*.5, s=Math.sqrt(1-u*u); return [Math.cos(th)*s*r, u*r, Math.sin(th)*s*r]; });
+  // particles travelling along two tilted orbit rings
+  const ORBITS = [{tilt:-.38, rx:1.5, ry:.42, speed:.0022}, {tilt:.52, rx:1.42, ry:.36, speed:-.0016}];
+  const sparks = Array.from({length: small ? 26 : 46}, (_,k)=>({o:k%2, a:Math.random()*6.283, j:(Math.random()-.5)*.09, sz:.8+Math.random()*1.6}));
+  let W=0,H=0,dpr=1, ry=0, rx=.35, tx=.35, ty=0, visible=true, tick=0;
   function size(){ dpr = Math.min(devicePixelRatio||1, 2); const b = cv.getBoundingClientRect(); W=b.width; H=b.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
   size(); new ResizeObserver(()=>{ size(); draw(); }).observe(cv);
   const proj = new Array(N);
+  const rot = (x,y,z,cY,sY,cX,sX)=>{ const x1=x*cY+z*sY, z1=-x*sY+z*cY; return [x1, y*cX-z1*sX, y*sX+z1*cX]; };
+  function orbitPoint(o,a,cx,cy,R,j=0){
+    const O = ORBITS[o], ex = Math.cos(a)*O.rx*(1+j), ey = Math.sin(a)*O.ry*(1+j), c=Math.cos(O.tilt), s=Math.sin(O.tilt);
+    return [cx + (ex*c - ey*s)*R, cy + (ex*s + ey*c)*R, Math.sin(a)];   // z>0 = in front of the sphere
+  }
+  function drawOrbits(cx,cy,R,front){
+    for(let o=0;o<ORBITS.length;o++){
+      ctx.beginPath();
+      for(let k=0;k<=90;k++){
+        const a = k/90*6.283, p = orbitPoint(o,a,cx,cy,R);
+        if((p[2]>0)!==front){ ctx.moveTo(p[0],p[1]); continue; }
+        ctx.lineTo(p[0],p[1]);
+      }
+      ctx.strokeStyle = front ? "rgba(167,139,250,.28)" : "rgba(129,140,248,.14)"; ctx.lineWidth = 1; ctx.stroke();
+    }
+    for(const sp of sparks){
+      const p = orbitPoint(sp.o, sp.a, cx, cy, R, sp.j);
+      if((p[2]>0)!==front) continue;
+      ctx.fillStyle = `rgba(56,189,248,${front ? .85 : .35})`;
+      ctx.beginPath(); ctx.arc(p[0],p[1],sp.sz,0,6.283); ctx.fill();
+    }
+    if(front){   // small comet on the first orbit
+      const a = tick*.006, head = orbitPoint(0,a,cx,cy,R), tail = orbitPoint(0,a-.35,cx,cy,R);
+      const g = ctx.createLinearGradient(tail[0],tail[1],head[0],head[1]);
+      g.addColorStop(0,"rgba(236,72,153,0)"); g.addColorStop(1,"rgba(244,114,182,.9)");
+      ctx.strokeStyle = g; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(tail[0],tail[1]);
+      for(let k=1;k<=10;k++){ const p = orbitPoint(0,a-.35+.035*k,cx,cy,R); ctx.lineTo(p[0],p[1]); }
+      ctx.stroke();
+    }
+  }
   function draw(){
     ctx.clearRect(0,0,W,H);
-    const cx=W/2, cy=H/2, R=Math.min(W,H)*.36;
-    const g = ctx.createRadialGradient(cx,cy,R*.1,cx,cy,R*1.5);
-    g.addColorStop(0,"rgba(124,92,255,.32)"); g.addColorStop(.55,"rgba(34,211,238,.08)"); g.addColorStop(1,"rgba(8,7,19,0)");
+    const cx=W/2, cy=H/2, R=Math.min(W,H)*.32;
+    const g = ctx.createRadialGradient(cx,cy,R*.05,cx,cy,R*1.7);
+    g.addColorStop(0,"rgba(168,85,247,.38)"); g.addColorStop(.45,"rgba(99,102,241,.12)"); g.addColorStop(1,"rgba(8,7,19,0)");
     ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    drawOrbits(cx,cy,R,false);
     const cY=Math.cos(ry), sY=Math.sin(ry), cX=Math.cos(rx), sX=Math.sin(rx);
     for(let i=0;i<N;i++){
-      let [x,y,z]=pts[i];
-      let x1=x*cY+z*sY, z1=-x*sY+z*cY;
-      let y1=y*cX-z1*sX, z2=y*sX+z1*cX;
-      const s = 1/(1.9 - z2*.55);
-      proj[i] = [cx + x1*R*s*1.55, cy + y1*R*s*1.55, z2];
+      const [x1,y1,z2] = rot(pts[i][0],pts[i][1],pts[i][2],cY,sY,cX,sX);
+      const s = 1/(1.9 - z2*.5);
+      proj[i] = [cx + x1*R*s*1.9, cy + y1*R*s*1.9, z2];
     }
-    ctx.lineWidth = 1;
+    for(const q of inner){
+      const [x1,y1,z2] = rot(q[0],q[1],q[2],cY,sY,cX,sX), s = 1/(1.9 - z2*.5);
+      ctx.fillStyle = `rgba(56,189,248,${.35+(z2+1)*.3})`;
+      ctx.beginPath(); ctx.arc(cx + x1*R*s*1.9, cy + y1*R*s*1.9, 1.6+(z2+1)*.8, 0, 6.283); ctx.fill();
+    }
     for(const [i,j] of edges){
-      const a=proj[i], b=proj[j], d=(a[2]+b[2])/2;
-      const al = .12 + (d+1)/2*.5;
-      ctx.strokeStyle = d>0 ? `rgba(167,139,250,${al})` : `rgba(34,211,238,${al*.7})`;
+      const a=proj[i], b=proj[j], d=(a[2]+b[2])/2, al = .14 + (d+1)/2*.55;
+      const lg = ctx.createLinearGradient(a[0],a[1],b[0],b[1]);
+      lg.addColorStop(0,`rgba(129,140,248,${al})`); lg.addColorStop(1,`rgba(56,189,248,${al*.85})`);
+      ctx.strokeStyle = lg; ctx.lineWidth = d>0 ? 1.3 : .8;
       ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke();
     }
     for(let i=0;i<N;i++){
-      const p=proj[i], d=(p[2]+1)/2, r=1+d*2.1;
-      ctx.fillStyle = i%5===0 ? `rgba(34,211,238,${.45+d*.55})` : `rgba(196,181,253,${.35+d*.65})`;
+      const p=proj[i], d=(p[2]+1)/2, r=1.2+d*2.4;
+      ctx.fillStyle = `rgba(244,${170+Math.round(d*60)},252,${.4+d*.6})`;
+      ctx.shadowColor = "rgba(236,72,153,.8)"; ctx.shadowBlur = d>.6 ? 8 : 0;
       ctx.beginPath(); ctx.arc(p[0],p[1],r,0,6.283); ctx.fill();
     }
+    ctx.shadowBlur = 0;
+    drawOrbits(cx,cy,R,true);
   }
   const wrap = cv.parentElement;
   wrap.parentElement.addEventListener("pointermove", e=>{
@@ -1056,7 +1121,8 @@ function updateOrbActive(){ orbActive = !homeEl.hidden; }
     requestAnimationFrame(frame);
     if(!visible || !orbActive || document.hidden) return;
     if(reduceMotion.matches) return;
-    ry += .0032; rx += (tx - rx)*.04; ry += ty*.0016;
+    ry += .0026; rx += (tx - rx)*.04; ry += ty*.0016; tick++;
+    for(const sp of sparks) sp.a += ORBITS[sp.o].speed * (1 + sp.j*4);
     draw();
   }
   draw();
