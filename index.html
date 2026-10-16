@@ -1,0 +1,1074 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EDU456 E-Portfolio | Lokman Hakim bin Yusoff</title>
+<meta name="description" content="EDU456 E-Portfolio of Lokman Hakim bin Yusoff — exploring creativity through artificial intelligence.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ===== Design tokens ===== */
+:root{
+  --bg:#080713; --bg-2:#0e0c22; --panel:rgba(255,255,255,.04); --panel-2:rgba(255,255,255,.07);
+  --line:rgba(167,139,250,.22); --line-2:rgba(255,255,255,.1);
+  --text:#efedff; --muted:#a29dcb; --dim:#6f6a99;
+  --violet:#8b5cf6; --violet-2:#a78bfa; --cyan:#22d3ee; --blue:#4f8cff; --pink:#e879f9;
+  --grad:linear-gradient(90deg,#a78bfa 0%,#7c5cff 40%,#22d3ee 100%);
+  --radius:20px; --radius-sm:12px;
+  --shadow:0 20px 60px -20px rgba(99,70,255,.45);
+  --font-display:Unbounded,system-ui,sans-serif;
+  --font-body:Manrope,system-ui,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,monospace;
+  --card-bg:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.016));
+  --card-line:rgba(255,255,255,.09);
+  --card-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 20px 60px -20px rgba(0,0,0,.6);
+  --head-grad:linear-gradient(90deg,#f5f3ff 0%,#c4b5fd 40%,#a855f7 68%,#38bdf8 100%);
+  --maxw:1180px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:
+   radial-gradient(900px 520px at 88% -8%,rgba(124,92,255,.28),transparent 60%),
+   radial-gradient(700px 500px at -8% 38%,rgba(34,211,238,.13),transparent 60%),
+   var(--bg)}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(rgba(167,139,250,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(167,139,250,.07) 1px,transparent 1px);
+  background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse at 50% 20%,#000 20%,transparent 75%);mask-image:radial-gradient(ellipse at 50% 20%,#000 20%,transparent 75%)}
+a{color:inherit}
+img{max-width:100%;display:block}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:8px}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.skip{position:absolute;left:-999px;top:8px;background:var(--violet);padding:8px 14px;border-radius:8px;z-index:100}
+.skip:focus{left:8px}
+[hidden]{display:none!important}
+
+/* ===== Type ===== */
+.eyebrow{font:400 11px/1.4 var(--font-mono);letter-spacing:.3em;text-transform:uppercase;color:#7dd3fc}
+.h-display{font-family:var(--font-display);font-weight:700;letter-spacing:-.02em;line-height:1}
+.h-section{font:700 clamp(2rem,4.2vw,3rem)/1.1 var(--font-display);letter-spacing:-.01em;margin:12px 0 14px;
+  background:var(--head-grad);-webkit-background-clip:text;background-clip:text;color:transparent;width:fit-content}
+.sec-head{text-align:center;display:flex;flex-direction:column;align-items:center}
+.lead{color:#94a3b8;max-width:62ch;font-size:.98rem}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ===== Buttons / glass ===== */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:999px;font-weight:600;font-size:.95rem;text-decoration:none;cursor:pointer;border:1px solid var(--line);background:var(--panel);transition:transform .2s,box-shadow .2s,border-color .2s}
+.btn:hover{transform:translateY(-2px);border-color:var(--violet-2)}
+.btn.primary{background:linear-gradient(90deg,#7c5cff,#3b82f6);border-color:transparent;box-shadow:0 10px 30px -10px rgba(99,70,255,.7)}
+.btn.primary:hover{box-shadow:0 14px 36px -8px rgba(99,70,255,.9)}
+.glass{background:var(--card-bg);border:1px solid var(--card-line);border-radius:24px;box-shadow:var(--card-shadow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.chip{display:inline-block;padding:6px 14px;border-radius:999px;border:1px solid rgba(34,211,238,.28);background:rgba(34,211,238,.06);font:500 .8rem var(--font-body);color:#a5f3fc}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font:500 .64rem/1.4 var(--font-mono);letter-spacing:.14em;text-transform:uppercase}
+.badge.wip{background:rgba(250,204,21,.12);color:#fde68a;border:1px solid rgba(250,204,21,.3)}
+.badge.done{background:rgba(34,211,238,.12);color:#67e8f9;border:1px solid rgba(34,211,238,.3)}
+.badge.plan{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line-2)}
+
+/* ===== Nav ===== */
+.nav{position:sticky;top:12px;z-index:50;padding:0 16px}
+.nav-inner{position:relative;max-width:1100px;margin:0 auto;height:60px;padding:0 10px 0 12px;display:flex;align-items:center;justify-content:space-between;
+  border-radius:18px;background:rgba(14,12,30,.72);border:1px solid var(--card-line);box-shadow:var(--card-shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand .logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font:700 11px var(--font-display);color:#fff;
+  background:linear-gradient(135deg,#a855f7,#6366f1 55%,#22d3ee);box-shadow:0 0 18px -4px rgba(168,85,247,.8)}
+.brand b{display:block;font:700 13px/1.2 var(--font-display);letter-spacing:.02em}
+.brand small{display:block;font:400 9px/1.3 var(--font-mono);letter-spacing:.22em;color:#94a3b8;text-transform:uppercase}
+.menu{display:flex;gap:2px;list-style:none}
+.menu a{display:block;padding:7px 13px;border-radius:999px;text-decoration:none;color:#94a3b8;font:500 .84rem var(--font-body);border:1px solid transparent;transition:.2s}
+.menu a:hover{color:#fff}
+.menu a[aria-current="true"]{color:#fff;background:rgba(168,85,247,.14);border-color:rgba(196,181,253,.35)}
+.burger{display:none;background:var(--card-bg);border:1px solid var(--card-line);border-radius:12px;width:40px;height:40px;cursor:pointer}
+
+/* ===== Hero ===== */
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center;min-height:calc(100vh - 66px);padding:40px 0 60px}
+.hero h1{font-size:clamp(2.2rem,5vw,4.2rem);margin:18px 0 14px;white-space:nowrap}
+.hero h1 .l2{display:block;color:#fff}
+.hero .name{font:500 .9rem var(--font-mono);letter-spacing:.3em;color:#94a3b8;text-transform:uppercase}
+.hero .course{margin-top:8px;font:500 .74rem/1.5 var(--font-mono);letter-spacing:.08em;color:#7dd3fc}
+.hero .sub{font:500 clamp(1rem,1.6vw,1.25rem)/1.4 var(--font-display);margin:22px 0 10px;color:#e6e2ff}
+.hero .desc{color:#94a3b8;max-width:54ch;margin-bottom:30px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.orb-wrap{position:relative;aspect-ratio:1/1;width:100%;max-width:560px;justify-self:center}
+#orb{width:100%;height:100%;display:block}
+.float-label{position:absolute;padding:10px 16px;border-radius:14px;font:500 .66rem/1.3 var(--font-mono);letter-spacing:.2em;color:#cbd5e1;border:1px solid var(--card-line);background:rgba(14,12,34,.72);backdrop-filter:blur(10px);animation:bob 6s ease-in-out infinite}
+.float-label b{display:block;font:700 1.35rem/1.2 var(--font-display);letter-spacing:0;color:#fff}
+.float-label.a{left:2%;top:14%}
+.float-label.b{right:2%;bottom:16%;animation-delay:-3s}
+@keyframes bob{50%{transform:translateY(-10px)}}
+.scroll-hint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font:600 .65rem var(--font-display);letter-spacing:.3em;color:var(--dim)}
+
+/* ===== Sections ===== */
+section.block{padding:96px 0;position:relative}
+.sec-head{margin-bottom:40px}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* About */
+.about{display:grid;grid-template-columns:.62fr 1fr;gap:24px;align-items:start;max-width:1040px;margin:0 auto}
+.profile{padding:16px 16px 22px}
+.profile .ph{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:4/5;border:1.5px solid rgba(196,181,253,.75);box-shadow:0 0 40px -6px rgba(168,85,247,.75)}
+.profile .ph img{width:100%;height:100%;object-fit:cover}
+.mini{font:400 10px/1.4 var(--font-mono);letter-spacing:.3em;text-transform:uppercase;color:#c4b5fd;margin:20px 6px 6px}
+.profile h3{font:700 1.15rem/1.3 var(--font-display);margin:0 6px 16px;text-transform:uppercase}
+.facts{list-style:none;margin:0 6px;display:grid;gap:14px}
+.facts li{display:flex;gap:12px;align-items:flex-start}
+.facts .fi{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.05);border:1px solid var(--card-line)}
+.facts .fi svg{width:15px;height:15px;stroke:#c4b5fd;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.facts small{display:block;font-size:.72rem;color:#64748b;line-height:1.3}
+.facts b{display:block;font-weight:600;font-size:.88rem;color:#e2e8f0;line-height:1.4}
+.bio{padding:clamp(22px,3vw,34px)}
+.bio .intro{font:600 clamp(1rem,1.5vw,1.2rem)/1.55 var(--font-display);color:#fff;margin-bottom:20px}
+.bio p:not(.intro){color:#94a3b8;font-size:.92rem;line-height:1.8}
+.bio p:not(.intro)+p{margin-top:16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px;padding-top:24px;border-top:1px solid var(--card-line)}
+.stats b{display:block;font:700 clamp(1.6rem,3vw,2.2rem)/1 var(--font-display);background:var(--head-grad);-webkit-background-clip:text;background-clip:text;color:transparent;width:fit-content}
+.stats span{display:block;margin-top:6px;font-size:.78rem;color:#64748b}
+
+/* Project gallery */
+/* project cards: matched to the Netlify version */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.pcard{position:relative;display:flex;flex-direction:column;height:100%;text-decoration:none;color:#fff;border-radius:24px;overflow:hidden;
+  background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.016));border:1px solid rgba(255,255,255,.09);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 20px 60px -20px rgba(0,0,0,.6);transition:transform .3s ease-out,box-shadow .3s ease-out}
+.pcard:hover,.pcard:focus-visible{transform:translateY(-6px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 30px 80px -30px rgba(168,85,247,.7)}
+.pcard .spot{pointer-events:none;position:absolute;inset:0;z-index:2;opacity:0;transition:opacity .3s;background:radial-gradient(400px circle at var(--mx,50%) var(--my,50%),rgba(168,85,247,.16),transparent 45%)}
+.pcard:hover .spot{opacity:1}
+.thumb{position:relative;aspect-ratio:16/10;overflow:hidden;background:#0b0a18}
+.thumb img{width:100%;height:100%;object-fit:cover;transition:transform .7s}
+.pcard:hover .thumb img{transform:scale(1.1)}
+.thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,#080713 0%,transparent 55%)}
+.thumb .num{position:absolute;left:16px;top:16px;z-index:1;font:400 11px/1 "JetBrains Mono",ui-monospace,monospace;padding:7px 12px;border-radius:999px;
+  background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.016));border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(8px)}
+.pbody{position:relative;z-index:3;display:flex;flex-direction:column;flex:1;padding:24px}
+.pbody .cat{font:400 11px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase}
+.tone-violet{color:#c4b5fd}.tone-sky{color:#7dd3fc}.tone-pink{color:#f9a8d4}
+.pbody h3{margin-top:8px;font:600 18px/1.35 Unbounded,var(--font-display)}
+.pbody p{margin-top:12px;flex:1;font:400 14px/1.65 Manrope,var(--font-body);color:#94a3b8}
+.pbody .go{margin-top:24px;display:inline-flex;align-items:center;gap:8px;width:fit-content;padding:10px 20px;border-radius:999px;
+  font:600 14px Manrope,var(--font-body);color:#fff;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);transition:background .3s,border-color .3s}
+.pbody .go svg{transition:transform .3s}
+.pcard:hover .go{background:rgba(255,255,255,.08);border-color:rgba(196,181,253,.45)}
+.pcard:hover .go svg{transform:translateX(4px)}
+
+/* Tools */
+.tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:1040px;margin:0 auto}
+.tool{padding:18px;border-radius:16px;transition:transform .25s,border-color .25s,box-shadow .25s}
+.tool:hover{transform:translateY(-4px);border-color:rgba(196,181,253,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 24px 60px -24px rgba(168,85,247,.6)}
+.tool .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;margin-bottom:14px;
+  background:linear-gradient(135deg,rgba(168,85,247,.28),rgba(56,189,248,.16));border:1px solid rgba(196,181,253,.3)}
+.tool .ic svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tool h3{font:600 .88rem/1.3 var(--font-display);display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.tool p{color:#94a3b8;font-size:.8rem;line-height:1.55;margin-top:6px}
+.tool .badge{font-size:.58rem;padding:2px 8px}
+
+/* Marquee band */
+.marquee{overflow:hidden;border-block:1px solid var(--card-line);padding:18px 0;margin:10px 0 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.marquee .track{display:flex;width:max-content;animation:marq 40s linear infinite}
+.marquee span{display:inline-flex;align-items:center;gap:36px;padding-right:36px;font:700 clamp(1.4rem,3vw,2.2rem)/1 var(--font-display);color:rgba(226,232,240,.2);white-space:nowrap;text-transform:uppercase}
+.marquee svg{width:22px;height:22px;stroke:#a855f7;fill:none;stroke-width:1.8;stroke-linejoin:round}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* Reflection */
+.rpanel{max-width:760px;margin:0 auto;padding:clamp(28px,5vw,48px);position:relative;overflow:hidden}
+.rpanel::before,.rpanel::after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;filter:blur(60px);pointer-events:none}
+.rpanel::before{left:-90px;top:-110px;background:rgba(56,189,248,.18)}
+.rpanel::after{right:-90px;bottom:-120px;background:rgba(236,72,153,.18)}
+.rpanel .qi{position:relative;font:700 2.6rem/1 var(--font-display);background:linear-gradient(135deg,#a855f7,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent;height:30px;margin-bottom:14px}
+.rpanel blockquote{position:relative;font:600 clamp(1.05rem,2vw,1.35rem)/1.6 var(--font-display);color:#fff}
+.rpanel .by{position:relative;margin-top:24px;font:400 10px var(--font-mono);letter-spacing:.3em;text-transform:uppercase;color:#94a3b8}
+
+/* Footer / contact */
+footer{position:relative;margin-top:60px;padding:44px 0 38px;border-top:1px solid var(--card-line)}
+footer::before{content:"";position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:min(520px,70%);height:1px;background:linear-gradient(90deg,transparent,#a855f7,#38bdf8,transparent)}
+.fgrid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:24px;align-items:center}
+.fgrid h3{font:700 1.05rem/1.3 var(--font-display);margin:6px 0 4px}
+.fgrid p{font-size:.82rem;color:#94a3b8}
+.fcard{display:flex;gap:12px;align-items:center;padding:14px 16px;border-radius:16px}
+.fcard .fi{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(168,85,247,.28),rgba(56,189,248,.16));border:1px solid rgba(196,181,253,.3)}
+.fcard .fi svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.fcard small{display:block;font-size:.7rem;color:#64748b}
+.fcard b{display:block;font-size:.85rem;font-weight:600}
+.fcopy{text-align:right;font:400 .72rem/1.6 var(--font-body);color:#64748b}
+
+/* ===== Project page ===== */
+.ppage{padding-top:34px;padding-bottom:90px}
+.back{display:inline-flex;gap:8px;align-items:center;text-decoration:none;color:var(--muted);font-weight:600;padding:8px 14px;border:1px solid var(--line-2);border-radius:999px;background:var(--panel)}
+.back:hover{color:#fff;border-color:var(--violet-2)}
+.phero{margin:26px 0 38px;display:grid;gap:14px}
+.phero h1{font:700 clamp(2rem,5vw,3.6rem)/1.05 var(--font-display);letter-spacing:-.02em;max-width:20ch}
+.meta{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.pgrid2{display:grid;grid-template-columns:1.25fr .75fr;gap:26px;align-items:start}
+.panel{padding:26px}
+.panel h2{font:500 11px var(--font-mono);letter-spacing:.3em;text-transform:uppercase;color:var(--cyan);margin-bottom:12px}
+.panel p{color:#d3cff5}
+.panel p+p{margin-top:12px}
+.stack{display:grid;gap:22px}
+.steps{list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:14px;margin-top:12px;color:#d3cff5}
+.steps li::before{content:"0" counter(s);font:700 1rem var(--font-display);color:var(--violet-2)}
+.kv{display:grid;gap:12px}
+.kv div{display:flex;justify-content:space-between;gap:16px;padding-bottom:10px;border-bottom:1px solid var(--line-2);font-size:.93rem}
+.kv span{color:var(--dim)}
+.kv b{font-weight:600;text-align:right}
+.note{font-size:.82rem;color:var(--dim);margin-top:8px}
+.prompt-wrap{position:relative;margin-top:4px}
+.prompt{max-height:320px;overflow:auto;white-space:pre-wrap;word-break:break-word;margin:0;padding:44px 16px 16px;border-radius:14px;border:1px solid var(--card-line);background:rgba(0,0,0,.3);
+  font:400 .8rem/1.65 var(--font-mono);color:#cbd5e1}
+.prompt .ph-h{color:#c4b5fd;font-weight:500}
+.copybtn{position:absolute;top:8px;right:14px;z-index:1;padding:5px 12px;font-size:.75rem}
+
+/* compare */
+.compare{position:relative;aspect-ratio:4/5;max-height:640px;width:100%;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);box-shadow:0 0 70px -14px rgba(124,92,255,.6);background:#000;user-select:none;touch-action:pan-y}
+.compare img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+.compare .after{clip-path:inset(0 0 0 var(--pos,50%))}
+.compare .tag{position:absolute;bottom:14px;padding:6px 12px;border-radius:10px;font:500 .66rem var(--font-mono);letter-spacing:.16em;text-transform:uppercase;background:rgba(8,7,19,.78);border:1px solid var(--line)}
+.compare .tag.l{left:14px}.compare .tag.r{right:14px}
+.compare .bar{position:absolute;top:0;bottom:0;left:var(--pos,50%);width:2px;background:#fff;box-shadow:0 0 18px #7c5cff;transform:translateX(-1px);pointer-events:none}
+.compare .bar::after{content:"\2194";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;background:#fff;color:#1b1745;display:grid;place-items:center;font-weight:700}
+.compare input[type=range]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
+.compare .zoom{position:absolute;right:14px;top:14px;z-index:3}
+.zbtn{background:rgba(8,7,19,.78);border:1px solid var(--line);padding:8px 14px;border-radius:999px;cursor:pointer;font-weight:600;font-size:.85rem}
+
+/* lightbox */
+dialog.lb{margin:auto;max-width:96vw;max-height:94vh;background:#05040d;border:1px solid var(--line);border-radius:18px;padding:14px;color:var(--text)}
+dialog.lb::backdrop{background:rgba(3,2,10,.88)}
+dialog.lb img{max-height:78vh;max-width:90vw;margin:auto;border-radius:12px}
+.lb .bar2{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+
+/* audio player */
+.player{display:grid;grid-template-columns:290px 1fr;gap:24px;padding:22px;align-items:center}
+/* album sleeve + CD: the disc peeks out, slides further out and spins while the song plays */
+.cover{--s:170px;--d:158px;position:relative;width:calc(var(--s) + 118px);height:var(--s)}
+.sleeve{position:absolute;inset:0 auto auto 0;width:var(--s);height:var(--s);z-index:2;border-radius:12px;overflow:hidden;
+  box-shadow:0 18px 40px -12px rgba(0,0,0,.85),0 0 40px -12px rgba(168,85,247,.75)}
+.sleeve img{width:100%;height:100%;object-fit:cover}
+.sleeve::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.18),transparent 35%,transparent 70%,rgba(255,255,255,.06))}
+.disc-slot{position:absolute;z-index:1;top:calc((var(--s) - var(--d)) / 2);left:calc(var(--s) - var(--d));width:var(--d);height:var(--d);
+  transform:translateX(40px);transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.cover.playing .disc-slot{transform:translateX(108px)}
+.disc{width:100%;height:100%;border-radius:50%;position:relative;
+  background:repeating-radial-gradient(circle at center,#121219 0 1.4px,#1e1e29 1.4px 2.8px);
+  box-shadow:0 12px 28px -8px rgba(0,0,0,.85),inset 0 0 0 2px rgba(255,255,255,.07);
+  animation:spin 3.2s linear infinite;animation-play-state:paused}
+.cover.playing .disc{animation-play-state:running}
+.disc .label{position:absolute;inset:28%;border-radius:50%;background-size:cover;background-position:center;
+  box-shadow:0 0 0 3px rgba(255,255,255,.08),0 0 14px rgba(168,85,247,.5);
+  -webkit-mask:radial-gradient(circle,transparent 0 13%,#000 14%);mask:radial-gradient(circle,transparent 0 13%,#000 14%)}
+.sheen{position:absolute;inset:0;border-radius:50%;pointer-events:none;mix-blend-mode:screen;
+  background:conic-gradient(from 20deg,transparent 0deg,rgba(168,85,247,.32) 40deg,transparent 80deg,rgba(56,189,248,.28) 160deg,transparent 200deg,rgba(236,72,153,.26) 250deg,transparent 290deg,rgba(255,255,255,.14) 330deg,transparent 360deg)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ptitle{font:700 1.35rem var(--font-display)}
+.psub{color:var(--muted);font-size:.9rem;margin-bottom:12px}
+.controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.play{width:54px;height:54px;border-radius:50%;border:0;cursor:pointer;background:linear-gradient(135deg,#7c5cff,#22d3ee);display:grid;place-items:center;box-shadow:0 8px 24px -6px rgba(99,70,255,.8)}
+.play svg{width:22px;height:22px;fill:#fff}
+.seek{flex:1;min-width:140px}
+.time{font:500 .85rem var(--font-display);color:var(--muted);min-width:92px;text-align:right;font-variant-numeric:tabular-nums}
+input[type=range].rng{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:99px;background:linear-gradient(90deg,var(--violet) var(--p,0%),rgba(255,255,255,.14) var(--p,0%));cursor:pointer}
+input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 0 10px #7c5cff}
+input[type=range].rng::-moz-range-thumb{width:16px;height:16px;border:0;border-radius:50%;background:#fff}
+.vol{display:flex;align-items:center;gap:8px;width:140px;color:var(--muted);font-size:.8rem}
+.pstate{margin-top:10px;font-size:.85rem;min-height:1.3em;color:var(--muted)}
+.pstate.err{color:#fda4af}
+.lyr-wrap{margin-top:22px}
+.lyr-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.lyrics{position:relative;max-height:150px;overflow:hidden;padding:12px;border-radius:14px;background:rgba(0,0,0,.28);transition:max-height .45s}
+.lyrics.open{max-height:420px;overflow:auto}
+.lyrics .sec{font:500 10px var(--font-mono);letter-spacing:.3em;text-transform:uppercase;color:var(--cyan);margin:14px 0 4px}
+.lyrics .sec:first-child{margin-top:0}
+.lyrics .ln{padding:3px 8px;border-radius:8px;color:var(--muted);transition:.2s;cursor:pointer;font-size:1.02rem}
+.lyrics .ln.active{color:#fff;font-weight:600;background:rgba(139,92,246,.24);text-shadow:0 0 16px rgba(167,139,250,.9)}
+.lyrics .ln.past{color:#c9c4ee}
+.syncbox{margin-top:16px;padding:14px;border:1px dashed var(--violet);border-radius:14px;font-size:.9rem}
+.syncbox .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.syncbox .btn{padding:8px 14px;font-size:.85rem}
+
+/* generic media container */
+.mediabox{aspect-ratio:16/9;border-radius:var(--radius);border:1px dashed var(--violet);background:repeating-linear-gradient(45deg,rgba(139,92,246,.06) 0 14px,transparent 14px 28px);display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted)}
+.mediabox b{display:block;color:#fff;font:700 1.15rem var(--font-display);margin:10px 0 4px}
+
+@media (max-width:980px){
+  .pgrid{grid-template-columns:repeat(2,1fr)}
+  .pgrid2,.about{grid-template-columns:1fr}
+  .profile{max-width:420px;width:100%;justify-self:center}
+  .tgrid{grid-template-columns:repeat(2,1fr)}
+  .fgrid{grid-template-columns:1fr 1fr}
+  .fcopy{grid-column:1/-1;text-align:left}
+}
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr;min-height:0;padding-top:28px}
+  .hero h1{font-size:clamp(1.6rem,8.2vw,3.4rem)}
+  .hero .name{letter-spacing:.12em;font-size:.9rem}
+  .orb-wrap{max-width:340px;order:-1;width:92%}
+  .float-label{padding:6px 10px;font-size:.6rem}
+  .float-label b{font-size:1.05rem}
+  .float-label.a{left:0;top:6%}
+  .float-label.b{right:0;bottom:8%}
+  .pgrid{grid-template-columns:1fr}
+  .burger{display:block}
+  .menu{display:none;position:absolute;top:66px;left:0;right:0;flex-direction:column;gap:4px;background:rgba(10,9,24,.97);padding:10px;border-radius:18px;border:1px solid var(--card-line)}
+  .menu.open{display:flex}
+  .menu a{padding:10px 14px}
+  .fgrid{grid-template-columns:1fr}
+  .stats{gap:10px}
+  .player{grid-template-columns:1fr}
+  .cover{justify-self:center;--s:150px;--d:140px}
+  section.block{padding:70px 0}
+  .scroll-hint{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav"><div class="nav-inner">
+  <a class="brand" href="#top" aria-label="EDU456 E-Portfolio home"><span class="logo">AI</span><span><b>EDU456 E-PORTFOLIO</b><small>Lokman Hakim bin Yusoff</small></span></a>
+  <button class="burger" id="burger" aria-label="Toggle menu" aria-expanded="false" aria-controls="menu">&#9776;</button>
+  <ul class="menu" id="menu">
+    <li><a href="#top" data-sec="top">Home</a></li>
+    <li><a href="#about" data-sec="about">About</a></li>
+    <li><a href="#projects" data-sec="projects">Projects</a></li>
+    <li><a href="#tools" data-sec="tools">Tools</a></li>
+    <li><a href="#reflection" data-sec="reflection">Reflection</a></li>
+    <li><a href="#contact" data-sec="contact">Contact</a></li>
+  </ul>
+</div></header>
+
+<main id="main" tabindex="-1">
+  <!-- ================= HOME ================= -->
+  <div id="home">
+    <div class="wrap" id="top">
+      <div class="hero">
+        <div>
+          <div class="eyebrow reveal">Student AI Portfolio</div>
+          <h1 class="h-display reveal"><span class="grad-text">EDU456</span><span class="l2">E-PORTFOLIO</span></h1>
+          <p class="name reveal">Lokman Hakim bin Yusoff</p>
+          <p class="course reveal">EDU456 · Innovative Technologies in Teaching and Learning · ED2422A</p>
+          <p class="sub reveal">Exploring Creativity Through Artificial Intelligence</p>
+          <p class="desc reveal">A digital showcase of educational and creative projects developed using AI, including visual art, music, video, interactive learning, and online course content.</p>
+          <div class="cta reveal">
+            <a class="btn primary" href="#projects">Explore Projects &rarr;</a>
+            <a class="btn" href="#about">About Me</a>
+          </div>
+        </div>
+        <div class="orb-wrap" aria-hidden="true">
+          <canvas id="orb"></canvas>
+          <div class="float-label a">PROJECTS<b>06</b></div>
+          <div class="float-label b">COURSE<b>EDU456</b></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="block" id="about"><div class="wrap">
+      <div class="sec-head reveal"><div class="eyebrow">01 — Introduction</div><h2 class="h-section">About Me</h2></div>
+      <div class="about">
+        <aside class="profile glass reveal">
+          <div class="ph"><img src="assets/profile.webp" alt="Portrait of Lokman Hakim bin Yusoff" loading="lazy" width="900" height="1124"></div>
+          <p class="mini">Portfolio Creator</p>
+          <h3>Lokman Hakim bin Yusoff</h3>
+          <ul class="facts">
+            <li><span class="fi"><svg viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span><div><small>Programme</small><b>Bachelor of Art Education</b></div></li>
+            <li><span class="fi"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6"/></svg></span><div><small>University</small><b>Universiti Teknologi MARA (UiTM), Puncak Alam</b></div></li>
+            <li><span class="fi"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span><div><small>Hometown</small><b>Marang, Terengganu</b></div></li>
+            <li><span class="fi"><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 012-2h12v18H6a2 2 0 01-2-2zM8 7h6"/></svg></span><div><small>Previous Qualification</small><b>Diploma in Fine Art</b></div></li>
+            <li><span class="fi"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></span><div><small>Course</small><b>EDU456 · Innovative Technologies in Teaching and Learning</b></div></li>
+            <li><span class="fi"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.5a3.5 3.5 0 010 7M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/></svg></span><div><small>Class</small><b>ED2422A</b></div></li>
+          </ul>
+        </aside>
+        <div class="bio glass reveal">
+          <p class="intro">My name is Lokman Hakim bin Yusoff, and I am from Marang, Terengganu. I am currently pursuing a Bachelor of Art Education at Universiti Teknologi MARA (UiTM), Puncak Alam. Before continuing my degree, I completed a Diploma in Fine Art, which provided me with a foundation in artistic knowledge, creative expression, and visual arts.</p>
+          <p>My interests extend beyond traditional fine art. I am passionate about digital art, graphic design, photography, animation, 3D modelling, music, game development, and artificial intelligence. I enjoy exploring how different forms of art and technology can come together to create new possibilities for creativity, communication, and education.</p>
+          <p>As a future art educator, my ambition is not only to teach but also to contribute to the growth and recognition of art in Malaysia. I believe that art plays an important role in shaping culture, preserving identity, and inspiring future generations. Through education and creative innovation, I hope to encourage greater appreciation for the arts and help strengthen their place in Malaysian society.</p>
+          <p>Through this EDU456 E-Portfolio, I aim to explore the potential of artificial intelligence as a tool for creativity and education while developing new skills that will support my journey as an artist and future educator.</p>
+          <div class="chips" aria-label="Interests">
+            <span class="chip">Digital Art</span><span class="chip">Graphic Design</span><span class="chip">Photography</span><span class="chip">Animation</span>
+            <span class="chip">3D Modelling</span><span class="chip">Music</span><span class="chip">Game Development</span><span class="chip">Artificial Intelligence</span>
+          </div>
+          <div class="stats">
+            <div><b>06</b><span>AI Projects</span></div>
+            <div><b id="statTools">04</b><span>Digital Tools Used</span></div>
+            <div><b>01</b><span>Portfolio</span></div>
+          </div>
+        </div>
+      </div>
+    </div></section>
+
+    <section class="block" id="projects"><div class="wrap">
+      <div class="sec-head reveal"><div class="eyebrow">02 — Showcase</div><h2 class="h-section">Projects</h2>
+        <p class="lead">Six AI-powered educational and creative projects. Select any project to view its overview, objective, tools, process, final output and reflection.</p></div>
+      <div class="pgrid" id="cards"></div>
+    </div></section>
+
+    <section class="block" id="tools"><div class="wrap">
+      <div class="sec-head reveal"><div class="eyebrow">03 — Toolkit</div><h2 class="h-section">Tools Used</h2>
+        <p class="lead">The AI and digital tools that powered the creation of these projects. Tools not yet confirmed are marked <em>Planned</em>.</p></div>
+      <div class="tgrid" id="tools-grid"></div>
+    </div></section>
+
+    <div class="marquee" aria-hidden="true"><div class="track" id="marquee"></div></div>
+
+    <section class="block" id="reflection"><div class="wrap">
+      <div class="sec-head reveal"><div class="eyebrow">04 — Looking Back</div><h2 class="h-section">Reflection</h2></div>
+      <div class="rpanel glass reveal">
+        <div class="qi" aria-hidden="true">&ldquo;</div>
+        <blockquote>Through this project, I learned how AI can support creativity, innovation, and education. It helped me explore new ways of producing digital content and presenting ideas effectively.</blockquote>
+        <p class="by">Lokman Hakim bin Yusoff</p>
+      </div>
+    </div></section>
+  </div>
+
+  <!-- ================= PROJECT PAGE ================= -->
+  <div id="project" hidden></div>
+</main>
+
+<footer id="contact"><div class="wrap fgrid">
+  <div>
+    <div class="eyebrow">Contact</div>
+    <h3>LOKMAN HAKIM BIN YUSOFF</h3>
+    <p>EDU456 Innovative Technologies in Teaching and Learning · ED2422A</p>
+  </div>
+  <div class="fcard glass">
+    <span class="fi"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6"/></svg></span>
+    <div><small>University</small><b>UiTM Puncak Alam · Bachelor of Art Education</b></div>
+  </div>
+  <p class="fcopy">© 2026 LOKMAN HAKIM BIN YUSOFF.<br>EDU456 E-PORTFOLIO. All rights reserved.</p>
+</div></footer>
+
+<dialog class="lb" id="lightbox" aria-label="Image viewer">
+  <div class="bar2">
+    <div><button class="zbtn" data-lb="orig">Original Photograph</button> <button class="zbtn" data-lb="ai">AI-Generated Artwork</button></div>
+    <button class="zbtn" id="lbClose">Close ✕</button>
+  </div>
+  <img id="lbImg" alt="">
+</dialog>
+
+<script>
+"use strict";
+/* ============================================================
+   DATA  (kept separate from UI components)
+   ============================================================ */
+const ASSETS = {
+  ai: "assets/ai-image-1.webp",
+  original: "assets/original-photo.jpg",
+  mp3: "assets/the-colors-of-my-voice.mp3",
+  // Same song, base64-encoded as plain text. Download managers (e.g. IDM) hijack any .mp3 / audio/mpeg
+  // request and pop up a download; a .txt request is left alone. Regenerate with:
+  //   base64 -w0 the-colors-of-my-voice.mp3 > song-audio.b64.txt
+  songText: "assets/song-audio.b64.txt",
+  cover: "assets/song-cover.webp"
+};
+
+let LYRICS_OFFSET = 1.5;            // seconds added to every lyric time before highlighting (stored timings never change)
+const LYRICS = [
+  {section:"Intro", lines:[[1.5,"Ooh, ooh..."],[7.0,"Can you hear the colors calling?"]]},
+  {section:"Verse 1", lines:[[12.2,"I used to hide behind the silence,"],[14.34,"With a thousand words inside."],[16.23,"Then I found a world of colors,"],[18.7,"Where my dreams could come alive."],[20.6,"Every line became a heartbeat,"],[22.53,"Every shade became a song."],[24.35,"On a canvas full of wonder,"],[26.21,"I discovered I belong."]]},
+  {section:"Pre-Chorus", lines:[[30.4,"When the world forgets to listen,"],[33.25,"And my words are hard to find,"],[35.29,"I can paint the things I'm feeling,"],[37.14,"Let my colors speak my mind."]]},
+  {section:"Chorus", lines:[[39.4,"This is my voice, this is my light,"],[42.93,"A thousand colors burning bright."],[45.61,"When words are lost, my art remains,"],[48.29,"A little hope beyond the rain."],[50.21,"Oh, let the whole world see,"],[52.73,"The beauty living inside me."],[55.22,"With every dream, with every choice,"],[59.04,"Art will always be my voice."]]},
+  {section:"Verse 2", lines:[[62.7,"In every picture lives a story,"],[65.65,"In every story, someone shines."],[68.1,"We can paint a better future,"],[70.03,"One small brushstroke at a time."]]},
+  {section:"Bridge", lines:[[72.0,"And if my colors fade away,"],[75.5,"The love I gave will always stay."],[79.51,"A piece of me in all I do,"],[83.07,"A world of dreams in every hue."]]},
+  {section:"Final Chorus", lines:[[91.1,"This is my voice, this is my light,"],[93.86,"A thousand colors burning bright."],[96.63,"When words are lost, my art remains,"],[98.79,"A little hope beyond the rain."],[101.28,"Oh, let the whole world see,"],[103.37,"The beauty living inside me."],[106.26,"With every dream, with every choice,"],[108.3,"Art will always be my voice."]]},
+  {section:"Outro", lines:[[112.9,"Ooh, ooh..."],[115.6,"Art will always be my voice."]]}
+];
+
+const ICONS = {
+  sparkle:'<svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 3v4M17 5h4"/></svg>',
+  image:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg>',
+  music:'<svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>',
+  video:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="3"/><path d="M16 10l5-3v10l-5-3z"/></svg>',
+  layout:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M10 10v10"/></svg>',
+  globe:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>'
+};
+
+const TOOLS = [
+  {name:"ChatGPT Image Generation", icon:"image", status:"used", text:"Generated the AI portrait for the AI Image project from a personal photograph."},
+  {name:"Suno AI", icon:"music", status:"used", text:"Generated the song \"The Colors of My Voice\" from the lyrics and a style prompt."},
+  {name:"ChatGPT", icon:"sparkle", status:"used", text:"Wrote the song lyrics, and helped with ideation, prompt writing and content drafting."},
+  {name:"Netlify", icon:"globe", status:"used", text:"Web publishing of this e-portfolio."},
+  {name:"Canva", icon:"layout", status:"planned", text:"Possible use for the flipbook and visual layouts. Not yet confirmed."},
+  {name:"Gamma", icon:"layout", status:"planned", text:"Possible use for AI-powered presentations. Not yet confirmed."},
+  {name:"CapCut", icon:"video", status:"planned", text:"Possible use for editing the AI video. Not yet confirmed."}
+];
+
+const GENERIC = (o) => Object.assign({
+  status:"wip",
+  objectives:["Learning objectives will be added once the final project is confirmed."],
+  tools:["To be confirmed"],
+  process:["Work in progress. The creative process will be documented when the project is completed."],
+  reflection:"Reflection will be written after the project is completed.",
+  media:{type:"WIP", label:"Media container", hint:"A PDF, video, game or course link can be embedded here once the final material is provided."}
+}, o);
+
+const PROJECTS = [
+  {key:"image", n:"01", cat:"AI Image", title:"My Digital Reflection: From Photograph to AI Art", cardTitle:"My Digital Reflection",
+   short:"A personal photograph transformed into a semi-realistic anime-inspired AI portrait.", status:"done", thumb:ASSETS.ai, kind:"image"},
+  {key:"song", n:"02", cat:"AI Song", title:"The Colors of My Voice", cardTitle:"The Colors of My Voice",
+   short:"An original English song about art as a language of emotional expression, generated with Suno AI.", status:"done", kind:"song"},
+  GENERIC({key:"flipbook", n:"03", cat:"Digital Flipbook", title:"Digital Flipbook", cardTitle:"Digital Flipbook",
+   short:"An interactive digital flipbook for creative storytelling or educational presentation.", art:"book",
+   overview:"This page will present an interactive digital flipbook. The topic, story and target audience have not been confirmed yet.",
+   media:{type:"PDF / Flipbook", label:"Flipbook viewer", hint:"A PDF or flipbook embed will appear here once the file is provided."}}),
+  GENERIC({key:"video", n:"04", cat:"AI Video", title:"AI Video", cardTitle:"AI Video",
+   short:"A video project developed using AI tools for visual generation, editing or storytelling.", art:"play",
+   overview:"This page will present a video project created with AI tools. The theme, story and tools have not been confirmed yet.",
+   media:{type:"Video", label:"Video player", hint:"A video file or link will be embedded here once it is provided."}}),
+  GENERIC({key:"game", n:"05", cat:"English Learning Game", title:"English Learning Game", cardTitle:"English Learning Game",
+   short:"An interactive English learning game supporting vocabulary, grammar or language practice.", art:"game",
+   overview:"This page will present an interactive English learning game. The game type, target learners and topic have not been confirmed yet.",
+   media:{type:"Game", label:"Game embed", hint:"The playable game or its link will be embedded here once it is provided."}}),
+  GENERIC({key:"mooc", n:"06", cat:"MOOC", title:"Massive Open Online Course (MOOC)", cardTitle:"Massive Open Online Course (MOOC)",
+   short:"A MOOC-style learning experience with educational content, outcomes and digital resources.", art:"course",
+   overview:"This page will present the MOOC component. It has not yet been decided whether it will be an original course or a completed existing MOOC.",
+   media:{type:"Course", label:"Course link / certificate", hint:"The course link or certificate will appear here once it is provided."}})
+];
+const BYKEY = Object.fromEntries(PROJECTS.map(p=>[p.key,p]));
+
+/* Original prompts supplied by the student (not regenerated) */
+const IMAGE_PROMPT = `Create a highly detailed, semi-realistic professional portrait of a young Asian man, using the uploaded reference photograph to accurately preserve his original facial identity.
+
+FACIAL IDENTITY:
+Preserve the exact facial proportions, jawline, nose shape, eye shape, eyebrows, lips, skin tone, and hairstyle from the reference image. Maintain natural facial asymmetry and realistic skin texture. Do not beautify, exaggerate, or significantly modify his facial features.
+
+HAIRSTYLE:
+Natural medium-length black hair with soft, voluminous, slightly wavy layers, casually swept to the sides. Individual hair strands should be clearly visible with subtle reflections from the surrounding neon lighting.
+
+OUTFIT:
+A sophisticated dark burgundy-red formal dress shirt with a slightly loosened metallic slate-blue necktie. Realistic fabric folds, stitching, and subtle textile details.
+
+POSE & EXPRESSION:
+Close-up upper-body portrait, shoulders slightly angled, head facing the camera with a relaxed, confident, neutral expression. Direct eye contact, natural posture, lips gently closed.
+
+LIGHTING:
+Professional cinematic studio lighting with soft frontal illumination, vibrant purple and magenta rim lighting from the left, and electric blue rim lighting from the right. Balanced exposure, natural facial shadows, subtle skin highlights, and controlled contrast.
+
+BACKGROUND:
+Dark futuristic technology-inspired studio environment featuring abstract geometric panels, softly glowing neon purple and electric blue light strips, subtle cyberpunk aesthetics, and a blurred background with shallow depth of field.
+
+ARTISTIC STYLE:
+Premium semi-realistic digital portrait, blending high-end editorial photography with subtle digital painting refinement. Natural skin texture, detailed hair strands, realistic facial anatomy, smooth but believable tonal transitions, and refined professional retouching.
+
+CAMERA & COMPOSITION:
+85mm portrait lens aesthetic, eye-level camera angle, centered vertical composition, head and upper torso visible, shallow depth of field, crisp facial details, soft background bokeh.
+
+QUALITY:
+Ultra-detailed, high-resolution, professional studio portrait, polished yet natural appearance, realistic color grading, clean composition.
+
+IMPORTANT:
+No exaggerated beauty filters, no plastic skin, no facial reshaping, no excessive HDR, no extreme shadows, no distorted anatomy, no cartoonish features, and no artificial-looking skin.`;
+
+const SONG_STYLE_PROMPT = "Ethereal indie folk-pop, dreamy atmospheric soundscape, airy expressive female vocals, emotional and uplifting, delicate piano, gentle acoustic guitar, shimmering synth pads, soft organic percussion, layered angelic harmonies, magical atmosphere, cinematic build-up, powerful soaring chorus, warm intimate production, 100 BPM, clear English pronunciation, enchanting and hopeful melody.";
+const SUNO_SETTINGS = [["Vocal Gender","Female"],["Duration","2:00 (Custom)"],["Weirdness","50%"],["Style Influence","50%"],["Max Mode","Off"],["Song Title","The Colors of My Voice"]];
+
+/* Gallery cards: same labels, text and artwork as the Netlify version */
+const CARDS = {
+  image:   {label:"Visual Art", title:"AI Image", tone:"violet", thumb:"assets/thumbs/ai-image.webp",
+            text:"A collection of AI-generated visual artworks created through prompt-based design and digital creativity."},
+  song:    {label:"Music & Lyrics", title:"AI Song", tone:"sky", thumb:"assets/thumbs/ai-song.webp",
+            text:"An AI-assisted music project featuring generated audio, lyrics, and creative sound exploration."},
+  flipbook:{label:"Interactive Storytelling", title:"Digital Flipbook", tone:"pink", thumb:"assets/thumbs/flipbook.webp",
+            text:"An interactive digital flipbook designed for creative storytelling or educational presentation."},
+  video:   {label:"Motion & Story", title:"AI Video", tone:"violet", thumb:"assets/thumbs/ai-video.webp",
+            text:"A video project developed using AI tools for visual generation, editing, or storytelling."},
+  game:    {label:"Game-Based Learning", title:"English Learning Game", tone:"sky", thumb:"assets/thumbs/english-game.webp",
+            text:"An interactive English learning game designed to support vocabulary, grammar, or language practice."},
+  mooc:    {label:"Online Course", title:"Massive Open Online Course (MOOC)", tone:"pink", thumb:"assets/thumbs/mooc.webp",
+            text:"A section presenting a MOOC-style learning experience with educational content, learning outcomes, and digital resources."}
+};
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+const SYNC = new URLSearchParams(location.search).get("sync") === "1";
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+};
+const fmt = s => (isFinite(s) ? Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0") : "0:00");
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* scroll reveal */
+const io = "IntersectionObserver" in window ? new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } }),{threshold:.12}) : null;
+function observeReveals(root=document){
+  $$(".reveal:not(.in)",root).forEach(el=>{ if(io && !reduceMotion.matches) io.observe(el); else el.classList.add("in"); });
+}
+
+/* ============================================================
+   UI COMPONENTS
+   ============================================================ */
+function illustration(kind){
+  const shapes = {
+    book:'<rect x="70" y="50" width="100" height="120" rx="10" fill="none" stroke="#a78bfa" stroke-width="3"/><rect x="190" y="50" width="100" height="120" rx="10" fill="none" stroke="#22d3ee" stroke-width="3"/><path d="M90 85h60M90 105h60M90 125h40M210 85h60M210 105h60" stroke="#fff" stroke-opacity=".5" stroke-width="3"/>',
+    play:'<rect x="70" y="45" width="220" height="130" rx="16" fill="none" stroke="#a78bfa" stroke-width="3"/><path d="M160 80l50 30-50 30z" fill="#22d3ee"/>',
+    game:'<rect x="80" y="70" width="200" height="90" rx="40" fill="none" stroke="#a78bfa" stroke-width="3"/><path d="M130 100v30M115 115h30" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="215" cy="105" r="9" fill="#22d3ee"/><circle cx="240" cy="125" r="9" fill="#e879f9"/>',
+    course:'<path d="M180 50l110 45-110 45L70 95z" fill="none" stroke="#a78bfa" stroke-width="3"/><path d="M110 118v32c40 24 100 24 140 0v-32" fill="none" stroke="#22d3ee" stroke-width="3"/>'
+  };
+  return `<svg class="ill" viewBox="0 0 360 225" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Temporary illustrative thumbnail"><defs><linearGradient id="g${kind}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#241a5e"/><stop offset="1" stop-color="#0b1a33"/></linearGradient></defs><rect width="360" height="225" fill="url(#g${kind})"/><g stroke="#a78bfa" stroke-opacity=".12">${Array.from({length:9},(_,i)=>`<path d="M${i*45} 0V225"/>`).join("")}${Array.from({length:6},(_,i)=>`<path d="M0 ${i*45}H360"/>`).join("")}</g>${shapes[kind]}</svg>`;
+}
+function songCoverThumb(){
+  return `<svg class="ill" viewBox="0 0 360 225" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Song cover illustration"><defs><radialGradient id="sg1" cx=".25" cy=".25" r=".7"><stop offset="0" stop-color="#e879f9" stop-opacity=".85"/><stop offset="1" stop-color="#e879f9" stop-opacity="0"/></radialGradient><radialGradient id="sg2" cx=".8" cy=".8" r=".7"><stop offset="0" stop-color="#22d3ee" stop-opacity=".8"/><stop offset="1" stop-color="#22d3ee" stop-opacity="0"/></radialGradient></defs><rect width="360" height="225" fill="#14103a"/><rect width="360" height="225" fill="url(#sg1)"/><rect width="360" height="225" fill="url(#sg2)"/><g fill="#fff" fill-opacity=".85">${Array.from({length:28},(_,i)=>{const h=18+Math.abs(Math.sin(i*.9))*70;return `<rect x="${24+i*11.4}" y="${112-h/2}" width="6" height="${h}" rx="3"/>`}).join("")}</g></svg>`;
+}
+function cardHTML(p){
+  const c = CARDS[p.key];
+  return `<a class="pcard reveal" href="#${p.key}" aria-label="View project ${p.n}: ${esc(c.title)}">
+    <span class="spot" aria-hidden="true"></span>
+    <div class="thumb"><img src="${c.thumb}" alt="${esc(c.title)} thumbnail" loading="lazy" width="960" height="597"><span class="num">${p.n}</span></div>
+    <div class="pbody"><p class="cat tone-${c.tone}">${esc(c.label)}</p><h3>${esc(c.title)}</h3><p>${esc(c.text)}</p>
+      <span class="go">View Project<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></div></a>`;
+}
+function toolHTML(t){
+  const label = t.status==="used" ? "" : `<span class="badge plan">Planned</span>`;
+  return `<article class="tool glass reveal"><div class="ic">${ICONS[t.icon]}</div><h3>${esc(t.name)} ${label}</h3><p>${esc(t.text)}</p></article>`;
+}
+function panel(h, inner, extra=""){ return `<section class="panel glass ${extra}"><h2>${h}</h2>${inner}</section>`; }
+/* read-only prompt block with a copy button; lines like "LIGHTING:" are shown as headings */
+function promptBlock(id, text){
+  const body = esc(text).split("\n").map(l => /^[A-Z][A-Z &]+:$/.test(l) ? `<b class="ph-h">${l}</b>` : l).join("\n");
+  return `<div class="prompt-wrap"><button class="zbtn copybtn" data-copy="${id}">Copy</button><pre class="prompt" id="${id}">${body}</pre></div>`;
+}
+
+/* ---------- AI IMAGE page ---------- */
+function imagePage(p){
+  return `
+  <div class="phero reveal">
+    <div class="meta"><span class="eyebrow">${p.n} — ${esc(p.cat)}</span><span class="badge done">Completed</span></div>
+    <h1>${esc(p.title)}</h1>
+    <div class="meta"><span class="chip">Tool: ChatGPT Image Generation</span><span class="chip">Semi-realistic anime-inspired portrait</span></div>
+  </div>
+  <div class="pgrid2">
+    <div class="stack">
+      <div class="reveal">
+        <div class="compare" id="compare" style="--pos:50%">
+          <img src="${ASSETS.ai}" alt="AI-generated portrait of Lokman Hakim in a red shirt with a futuristic purple and blue background">
+          <img class="after" src="${ASSETS.original}" alt="Original photograph of Lokman Hakim wearing a maroon shirt and blue tie" style="clip-path:inset(0 0 0 var(--pos,50%));">
+          <span class="tag l">AI-Generated Artwork</span><span class="tag r">Original Photograph</span>
+          <div class="bar"></div>
+          <div class="zoom"><button class="zbtn" id="openLb">⤢ Fullscreen</button></div>
+          <input type="range" min="0" max="100" value="50" id="cmpRange" aria-label="Drag to compare the AI-generated artwork with the original photograph">
+        </div>
+        <p class="note">Drag the slider (or use the arrow keys) to compare the AI-generated artwork on the left with the original photograph on the right.</p>
+      </div>
+      ${panel("Artwork Concept","<p>This project explores the relationship between personal identity, artificial intelligence, and digital art. A personal photograph was transformed into a semi-realistic anime-inspired portrait while preserving recognizable facial characteristics. Futuristic purple and blue lighting creates a visual connection with the website's creative-tech theme.</p>","reveal")}
+      ${panel("Creative Process",`<ol class="steps">
+        <li>The student selected a personal photograph.</li>
+        <li>Created a detailed prompt describing identity preservation and visual style.</li>
+        <li>Generated an AI portrait.</li>
+        <li>Compared the result with the original photograph.</li>
+        <li>Explored additional viewing angles.</li>
+        <li>Selected the final portrait for the portfolio.</li></ol>`,"reveal")}
+      ${panel("Personal Reflection","<p>The project demonstrated that effective AI image generation involves artistic decision-making, not merely entering prompts. Maintaining facial identity, evaluating proportions, and selecting an appropriate visual style required human judgement. The experience also revealed limitations in maintaining facial consistency across different viewing angles.</p>","reveal")}
+    </div>
+    <div class="stack">
+      ${panel("Project Details",`<div class="kv"><div><span>Title</span><b>My Digital Reflection</b></div><div><span>Tool</span><b>ChatGPT Image Generation</b></div><div><span>Input</span><b>Personal photograph</b></div><div><span>Output</span><b>AI-generated portrait</b></div></div>`,"reveal")}
+      ${panel("Educational Objective","<p>Demonstrate how artificial intelligence can support digital portraiture, artistic exploration, visual communication, and understanding of composition, identity and colour.</p>","reveal")}
+      ${panel("Original AI Prompt",`<p class="note" style="margin:0 0 10px">The original prompt used in ChatGPT Image Generation, together with the reference photograph.</p>${promptBlock("imgPrompt", IMAGE_PROMPT)}`,"reveal")}
+    </div>
+  </div>`;
+}
+
+/* ---------- AI SONG page ---------- */
+function songPage(p){
+  let idx=0, lyr="";
+  for(const s of LYRICS){ lyr += `<div class="sec">${esc(s.section)}</div>`; for(const l of s.lines){ lyr += `<div class="ln" data-i="${idx++}" tabindex="0" role="button" aria-label="Jump to: ${esc(l[1])}">${esc(l[1])}</div>`; } }
+  const syncUI = SYNC ? `
+    <div class="syncbox"><label for="off"><b>Lyrics offset</b> <span id="offVal"></span></label>
+      <input class="rng" id="off" type="range" min="-5" max="5" step="0.1" style="margin-top:8px">
+      <div class="row"><button class="btn" id="tap">Tap to sync line <span id="tapN">1</span></button><button class="btn" id="copyT">Copy timings</button><button class="btn" id="resetT">Reset</button></div>
+      <p class="note" id="tapInfo">Copy timings gives raw times (offset removed).</p></div>` : "";
+  return `
+  <div class="phero reveal">
+    <div class="meta"><span class="eyebrow">${p.n} — ${esc(p.cat)}</span><span class="badge done">Completed</span></div>
+    <h1>${esc(p.title)}</h1>
+    <div class="meta"><span class="chip">Suno AI</span><span class="chip">Lyrics: ChatGPT</span><span class="chip">English</span><span class="chip">Ethereal Indie Folk-Pop</span><span class="chip">Female vocal</span></div>
+  </div>
+  <div class="pgrid2">
+    <div class="stack">
+      <section class="player glass reveal" aria-label="Audio player">
+        <div class="cover" id="cover">
+          <div class="disc-slot" aria-hidden="true"><div class="disc"><div class="label" style="background-image:url('${ASSETS.cover}')"></div></div><div class="sheen"></div></div>
+          <div class="sleeve"><img src="${ASSETS.cover}" alt="Cover artwork for The Colors of My Voice" width="1254" height="1254"></div>
+        </div>
+        <div>
+          <div class="ptitle">The Colors of My Voice</div>
+          <div class="psub">AI-generated song · Suno AI · Ethereal Indie Folk-Pop</div>
+          <audio id="audio" preload="none"></audio>
+          <div class="controls">
+            <button class="play" id="play" aria-label="Play"><svg viewBox="0 0 24 24" id="playIc"><path d="M8 5v14l11-7z"/></svg></button>
+            <div class="seek"><input class="rng" id="seek" type="range" min="0" max="100" step="0.1" value="0" aria-label="Seek"></div>
+            <div class="time"><span id="cur">0:00</span> / <span id="dur">--:--</span></div>
+            <label class="vol">Vol <input class="rng" id="vol" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volume"></label>
+          </div>
+          <div class="pstate" id="pstate" role="status">Loading audio…</div>
+        </div>
+      </section>
+      <section class="panel glass reveal lyr-wrap">
+        <div class="lyr-head"><h2 style="margin:0">Full Lyrics</h2><button class="zbtn" id="lyrToggle" aria-expanded="false">Show full lyrics</button></div>
+        <div class="lyrics" id="lyrics">${lyr}</div>
+        <p class="note">Lyrics highlight as the song plays. Click a line to jump to it.</p>
+        ${syncUI}
+      </section>
+      ${panel("Song Concept","<p>The song presents art as a powerful language of emotional expression. Through imagery involving colours, brushstrokes and creativity, it communicates how art allows individuals to express experiences and feelings beyond words.</p>","reveal")}
+      ${panel("Creative Production Process","<p>The student first explored ideas for a song about the importance of art, developed the concept \"Art Is My Voice\", used ChatGPT to write the English lyrics based on that concept, and used Suno AI to explore ethereal folk-pop music with atmospheric instruments and uplifting female vocals.</p>","reveal")}
+      ${panel("Personal Reflection","<p>Creating this song was more challenging than I initially expected. I spent almost an entire week struggling to find a meaningful concept and a suitable song title. I wanted the song to express the true importance of art rather than simply describe colours or painting.</p><p>After exploring different ideas, I chose \"The Colors of My Voice\" because it represents how art allows us to communicate thoughts and emotions beyond words.</p><p>This process taught me that although artificial intelligence can generate music quickly, creating something meaningful still requires patience, creativity, and thoughtful artistic decisions.</p>","reveal")}
+    </div>
+    <div class="stack">
+      ${panel("Song Overview",`<div class="kv"><div><span>Title</span><b>The Colors of My Voice</b></div><div><span>AI tool</span><b>Suno AI</b></div><div><span>Lyrics</span><b>Written with ChatGPT</b></div><div><span>Language</span><b>English</b></div><div><span>Theme</span><b>Art Is My Voice</b></div><div><span>Genre</span><b>Ethereal Indie Folk-Pop</b></div><div><span>Mood</span><b>Uplifting, emotional, dreamy, atmospheric</b></div><div><span>Vocal</span><b>Female</b></div><div><span>Tempo</span><b>100 BPM</b></div><div><span>Target duration</span><b>About 2 minutes</b></div><div><span>Actual duration</span><b id="durInfo">2:00</b></div></div>
+        <p class="note" style="margin-top:14px">Inspired by the ethereal atmosphere of "Runaway" by AURORA, without imitating its melody or vocal identity.</p>`,"reveal")}
+      ${panel("Educational Objective","<p>Encourage an appreciation of visual art and demonstrate how AI music generation can be used to communicate meaningful educational messages.</p>","reveal")}
+      ${panel("Music Style Prompt",`<p class="note" style="margin:0 0 10px">The original "Style of Music" prompt entered in Suno AI.</p>${promptBlock("songPrompt", SONG_STYLE_PROMPT)}
+        <h2 style="margin:22px 0 12px">Suno Advanced Settings</h2>
+        <div class="kv">${SUNO_SETTINGS.map(([k,v])=>`<div><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join("")}</div>`,"reveal")}
+    </div>
+  </div>`;
+}
+
+/* ---------- Generic (WIP) project page ---------- */
+function genericPage(p){
+  return `
+  <div class="phero reveal">
+    <div class="meta"><span class="eyebrow">${p.n} — ${esc(p.cat)}</span><span class="badge wip">Work in progress</span></div>
+    <h1>${esc(p.title)}</h1>
+  </div>
+  <div class="pgrid2">
+    <div class="stack">
+      <div class="reveal"><div class="mediabox"><div><span class="badge wip">Work in progress</span><b>${esc(p.media.label)}</b><span>${esc(p.media.hint)}</span></div></div></div>
+      ${panel("Project Overview",`<p>${esc(p.overview)}</p>`,"reveal")}
+      ${panel("Creative Process",`<ol class="steps">${p.process.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`,"reveal")}
+      ${panel("Reflection",`<p>${esc(p.reflection)}</p>`,"reveal")}
+    </div>
+    <div class="stack">
+      ${panel("Learning Objectives",`<ul class="steps">${p.objectives.map(s=>`<li>${esc(s)}</li>`).join("")}</ul>`,"reveal")}
+      ${panel("Tools Used",`<div class="chips" style="margin-top:0">${p.tools.map(t=>`<span class="chip">${esc(t)}</span>`).join("")}</div>`,"reveal")}
+      ${panel("Status",`<p>This project has not been completed yet, so no results are shown. The page is ready to receive its final ${esc(p.media.type)} content.</p>`,"reveal")}
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   ROUTER
+   ============================================================ */
+const homeEl = $("#home"), projEl = $("#project");
+const baseTitle = document.title;
+let audioEl = null;
+
+function stopAudio(){ if(audioEl){ try{ audioEl.pause(); }catch(e){} audioEl = null; } }
+
+function route(){
+  let raw = decodeURIComponent(location.hash.replace(/^#\/?/,""));
+  /* Every page load (opening the link, a remembered ".../#song" address, or a refresh) starts on the
+     homepage at the very top. Hash links only navigate once the page is open. */
+  if(!route.done && raw){
+    raw = "";
+    history.replaceState(null, "", location.pathname + location.search);
+  }
+  closeMenu();
+  stopAudio();
+  if(BYKEY[raw]){
+    showProject(BYKEY[raw]);
+    return;
+  }
+  projEl.hidden = true; projEl.innerHTML = "";
+  homeEl.hidden = false;
+  document.title = baseTitle;
+  updateOrbActive();
+  const go = smooth => {
+    const target = raw && raw!=="top" ? document.getElementById(raw) : null;
+    if(target){ target.scrollIntoView({behavior: smooth && !reduceMotion.matches ? "smooth":"instant", block:"start"}); }
+    else window.scrollTo({top:0, behavior:"instant"});
+    if(smooth && target && !reduceMotion.matches){
+      // safety net: if the smooth scroll was throttled or never ran, finish with an instant jump
+      setTimeout(()=>{
+        if(homeEl.hidden || location.hash.replace(/^#\/?/,"") !== raw) return;
+        const top = target.getBoundingClientRect().top;
+        if(top > 200 || top < -40) target.scrollIntoView({behavior:"instant", block:"start"});
+      }, 1100);
+    }
+  };
+  const first = !route.done; route.done = true;
+  if(first){
+    // direct load / refresh: jump instantly, then correct again once images and fonts have settled
+    go(false);
+    window.addEventListener("load", ()=>{ if(!homeEl.hidden && scrollY < 5) go(false); }, {once:true});
+    setTimeout(()=>{ if(!homeEl.hidden && location.hash.replace(/^#\/?/,"")===raw) go(false); }, 400);
+  } else go(true);
+}
+
+function showProject(p){
+  homeEl.hidden = true; projEl.hidden = false;
+  const body = p.kind==="image" ? imagePage(p) : p.kind==="song" ? songPage(p) : genericPage(p);
+  const idx = PROJECTS.indexOf(p), prev = PROJECTS[idx-1], next = PROJECTS[idx+1];
+  projEl.innerHTML = `<div class="wrap ppage">
+    <a class="back" href="#projects">&larr; Back to projects</a>
+    ${body}
+    <nav class="meta" style="margin-top:44px;justify-content:space-between" aria-label="Project navigation">
+      ${prev?`<a class="btn" href="#${prev.key}">&larr; ${prev.n} ${esc(prev.cat)}</a>`:"<span></span>"}
+      ${next?`<a class="btn" href="#${next.key}">${next.n} ${esc(next.cat)} &rarr;</a>`:"<span></span>"}
+    </nav></div>`;
+  document.title = p.cardTitle + " | EDU456 E-Portfolio";
+  window.scrollTo(0,0);
+  observeReveals(projEl);
+  if(p.kind==="image") initImagePage();
+  if(p.kind==="song") initSongPage();
+  const h1 = $("h1",projEl); if(h1){ h1.setAttribute("tabindex","-1"); h1.focus({preventScroll:true}); }
+}
+
+/* ============================================================
+   PAGE BEHAVIOUR
+   ============================================================ */
+function initImagePage(){
+  const cmp = $("#compare"), rng = $("#cmpRange");
+  rng.addEventListener("input", ()=> cmp.style.setProperty("--pos", rng.value+"%"));
+  const lb = $("#lightbox"), img = $("#lbImg");
+  const show = k => { img.src = k==="ai" ? ASSETS.ai : ASSETS.original; img.alt = k==="ai" ? "AI-generated artwork" : "Original photograph"; };
+  $("#openLb").addEventListener("click", ()=>{ show("ai"); lb.showModal(); });
+  $$("[data-lb]",lb).forEach(b=>b.onclick=()=>show(b.dataset.lb));
+  $("#lbClose").onclick = ()=>lb.close();
+  lb.onclick = e => { if(e.target===lb) lb.close(); };
+}
+
+/* copy buttons on prompt blocks */
+document.addEventListener("click", async e=>{
+  const btn = e.target.closest(".copybtn"); if(!btn) return;
+  const text = document.getElementById(btn.dataset.copy).textContent;
+  try{ await navigator.clipboard.writeText(text); btn.textContent = "Copied ✓"; }
+  catch(err){ window.prompt("Copy the prompt:", text); }
+  setTimeout(()=>btn.textContent = "Copy", 1600);
+});
+
+function initSongPage(){
+  const audio = $("#audio"); audioEl = audio;
+  const playBtn = $("#play"), playIc = $("#playIc"), seek = $("#seek"), cur = $("#cur"), dur = $("#dur"), vol = $("#vol"), st = $("#pstate"), cover = $("#cover");
+  const PLAY = "M8 5v14l11-7z", PAUSE = "M6 5h4v14H6zM14 5h4v14h-4z";
+  const setP = (el,val,max) => el.style.setProperty("--p", (max? val/max*100 : 0)+"%");
+  const say = (t,err=false) => { st.textContent = t; st.classList.toggle("err",err); };
+
+  audio.addEventListener("loadedmetadata", ()=>{
+    if(audioEl!==audio) return;            // the visitor already left the song page
+    dur.textContent = fmt(audio.duration); $("#durInfo").textContent = fmt(audio.duration);
+    seek.max = audio.duration; say("Ready to play.");
+  });
+  audio.addEventListener("waiting", ()=>say("Buffering…"));
+  audio.addEventListener("canplay", ()=>{ if(audio.paused) say("Ready to play."); });
+  audio.addEventListener("playing", ()=>say("Playing"));
+  audio.addEventListener("pause", ()=>say(audio.ended?"Finished":"Paused"));
+  let triedDirect = false;
+  function useDirect(){            // last resort: let the browser stream the file itself
+    if(triedDirect || audioEl!==audio) return;
+    triedDirect = true; say("Loading audio (direct)…"); audio.src = ASSETS.mp3; audio.load();
+  }
+  audio.addEventListener("error", ()=>{
+    if(audio.src.startsWith("blob:") && !triedDirect){ useDirect(); return; }
+    const code = audio.error ? audio.error.code : "?";
+    say(`Audio file could not be loaded (error ${code}). Check that assets/the-colors-of-my-voice.mp3 exists, then refresh with Ctrl+F5.`, true);
+    playBtn.disabled = true;
+  });
+  audio.addEventListener("play", ()=>{ playIc.innerHTML = `<path d="${PAUSE}"/>`; playBtn.setAttribute("aria-label","Pause"); cover.classList.add("playing"); });
+  const onStop = ()=>{ playIc.innerHTML = `<path d="${PLAY}"/>`; playBtn.setAttribute("aria-label","Play"); cover.classList.remove("playing"); };
+  audio.addEventListener("pause", onStop); audio.addEventListener("ended", onStop);
+  /* Load the whole MP3 into memory first. Servers without HTTP Range support make a plain <audio src>
+     non-seekable (seek bar and click-to-jump-lyrics silently fail); a Blob URL is always seekable. */
+  say("Press play to load the song.");
+  /* Nothing is requested until the visitor asks for sound (play, click a lyric, or use the seek bar),
+     so opening the page never triggers a download. */
+  let loadP = null;
+  function ensureLoaded(){
+    if(loadP) return loadP;
+    say("Loading audio…");
+    loadP = new Promise(resolve=>{
+      audio.addEventListener("loadedmetadata", resolve, {once:true});
+      audio.addEventListener("error", ()=>setTimeout(resolve,0), {once:true});
+      (function loadBlob(attempt){
+        fetch(ASSETS.songText).then(r=>{ if(!r.ok) throw new Error(r.status); return r.text(); })
+          .then(txt=>{
+            if(audioEl!==audio) return;
+            const bin = atob(txt.trim()), bytes = new Uint8Array(bin.length);
+            for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+            audio.src = URL.createObjectURL(new Blob([bytes],{type:"audio/mpeg"}));
+          })
+          .catch(()=>{
+            if(audioEl!==audio) return;
+            if(attempt<3){ say(`Loading audio… (retry ${attempt})`); setTimeout(()=>loadBlob(attempt+1), 700*attempt); }
+            else useDirect();        // fall back to direct streaming
+          });
+      })(1);
+    });
+    return loadP;
+  }
+  audio.__ensureLoaded = ensureLoaded;
+  playBtn.addEventListener("click", ()=>{
+    if(!audio.paused){ audio.pause(); return; }
+    ensureLoaded().then(()=>audio.play()).catch(()=>say("Playback was blocked. Press play again.",true));
+  });
+  audio.addEventListener("timeupdate", ()=>{
+    cur.textContent = fmt(audio.currentTime);
+    if(!seekDrag){ seek.value = audio.currentTime; setP(seek, audio.currentTime, audio.duration); }
+  });
+  let seekDrag = false;
+  seek.addEventListener("input", ()=>{ seekDrag = true; setP(seek, seek.value, audio.duration); cur.textContent = fmt(+seek.value); });
+  seek.addEventListener("change", ()=>{ const v = +seek.value; seekDrag = false; ensureLoaded().then(()=>{ audio.currentTime = v; }); });
+  vol.addEventListener("input", ()=>{ audio.volume = +vol.value; setP(vol, vol.value, 1); });
+  setP(vol,1,1);
+
+  /* lyrics */
+  const box = $("#lyrics"), els = $$(".ln",box);
+  const flat = LYRICS.flatMap(s=>s.lines.map(l=>({t:l[0],text:l[1]})));
+  const work = flat.map(l=>l.t);          // stored LYRICS stay untouched
+  let current = -2;
+  const activeIndex = now => { let a=-1; for(let i=0;i<work.length;i++){ if(now >= work[i]+LYRICS_OFFSET) a=i; else break; } return a; };
+  function render(){
+    const a = activeIndex(audio.currentTime);
+    if(a===current) return; current = a;
+    els.forEach((el,i)=>{ el.classList.toggle("active",i===a); el.classList.toggle("past",i<a); });
+    if(a>=0){ const el=els[a]; box.scrollTo({top: el.offsetTop - box.clientHeight/2 + el.clientHeight/2, behavior: reduceMotion.matches?"auto":"smooth"}); }
+  }
+  ["timeupdate","seeked","play"].forEach(ev=>audio.addEventListener(ev,render));
+  (function loop(){ if(audioEl!==audio) return; if(!audio.paused) render(); requestAnimationFrame(loop); })();
+  els.forEach((el,i)=>{
+    const go = ()=>{ ensureLoaded().then(()=>{ audio.currentTime = Math.max(0, flat[i].t + LYRICS_OFFSET); return audio.play(); }).catch(()=>{}); };
+    el.addEventListener("click",go);
+    el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(); } });
+  });
+  const tog = $("#lyrToggle");
+  tog.addEventListener("click", ()=>{
+    const open = box.classList.toggle("open");
+    tog.textContent = open ? "Collapse lyrics" : "Show full lyrics";
+    tog.setAttribute("aria-expanded", open);
+    current = -2; render();
+  });
+
+  /* sync tools (?sync=1) */
+  if(SYNC){
+    const off = $("#off"), offVal = $("#offVal"), tapN = $("#tapN"); let tapIdx = 0;
+    const show = ()=>{ offVal.textContent = (LYRICS_OFFSET>=0?"+":"")+LYRICS_OFFSET.toFixed(1)+" s"; setP(off, +off.value+5, 10); };
+    off.value = LYRICS_OFFSET; show();
+    off.addEventListener("input", ()=>{ LYRICS_OFFSET = parseFloat(off.value); show(); current=-2; render(); });
+    $("#tap").addEventListener("click", ()=>{
+      if(tapIdx>=work.length) return;
+      work[tapIdx] = +(audio.currentTime - LYRICS_OFFSET).toFixed(2);   // raw time = heard time minus offset
+      els[tapIdx].style.outline = "1px solid #8b5cf6"; tapIdx++; tapN.textContent = Math.min(tapIdx+1, work.length);
+    });
+    $("#resetT").addEventListener("click", ()=>{ tapIdx=0; tapN.textContent=1; flat.forEach((l,i)=>work[i]=l.t); els.forEach(e=>e.style.outline=""); current=-2; render(); });
+    $("#copyT").addEventListener("click", async ()=>{
+      let i=0, out="";
+      for(const s of LYRICS){ out += `[${s.section}]\n`; for(const l of s.lines){ out += `${work[i]} | ${l[1]}\n`; i++; } }
+      try{ await navigator.clipboard.writeText(out); $("#tapInfo").textContent = "Copied raw timings (no offset)."; }
+      catch(e){ window.prompt("Copy timings:", out); }
+    });
+  }
+}
+
+/* ============================================================
+   HOME: cards, tools, nav
+   ============================================================ */
+$("#cards").innerHTML = PROJECTS.map(cardHTML).join("");
+/* spotlight that follows the pointer inside each card */
+$("#cards").addEventListener("pointermove", e=>{
+  const card = e.target.closest(".pcard"); if(!card) return;
+  const b = card.getBoundingClientRect();
+  card.style.setProperty("--mx", (e.clientX-b.left)+"px"); card.style.setProperty("--my", (e.clientY-b.top)+"px");
+});
+$("#tools-grid").innerHTML = TOOLS.map(toolHTML).join("");     // used tools first (array order), planned ones carry a badge
+$("#statTools").textContent = String(TOOLS.filter(t=>t.status==="used").length).padStart(2,"0");
+/* marquee band: project names, duplicated once so the loop is seamless */
+{
+  const star = '<svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>';
+  const run = ["AI Image","AI Song","Digital Flipbook","AI Video","English Learning Game","MOOC"].map(n=>`<span>${n}${star}</span>`).join("");
+  $("#marquee").innerHTML = run + run;
+}
+
+const burger = $("#burger"), menu = $("#menu");
+function closeMenu(){ menu.classList.remove("open"); burger.setAttribute("aria-expanded","false"); }
+burger.addEventListener("click", ()=>{ const o = menu.classList.toggle("open"); burger.setAttribute("aria-expanded", o); });
+
+/* highlight current section in nav */
+const secIO = "IntersectionObserver" in window ? new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ $$(".menu a").forEach(a=>a.setAttribute("aria-current", a.dataset.sec===e.target.id)); } });
+},{rootMargin:"-45% 0px -50% 0px"}) : null;
+if(secIO) [$("#top"), ...$$("section.block"), $("#contact")].forEach(s=>secIO.observe(s));
+
+/* ============================================================
+   3D WIREFRAME ORB (canvas, no libraries)
+   ============================================================ */
+let orbActive = true;
+function updateOrbActive(){ orbActive = !homeEl.hidden; }
+(function orb(){
+  const cv = $("#orb"), ctx = cv.getContext("2d");
+  const small = innerWidth < 760;
+  const N = small ? 70 : 150, LINK = small ? .62 : .5;
+  const pts = [], ga = Math.PI*(3-Math.sqrt(5));
+  for(let i=0;i<N;i++){ const y = 1-(i/(N-1))*2, r = Math.sqrt(1-y*y), th = i*ga; pts.push([Math.cos(th)*r, y, Math.sin(th)*r]); }
+  const edges = [];
+  for(let i=0;i<N;i++) for(let j=i+1;j<N;j++){
+    const dx=pts[i][0]-pts[j][0], dy=pts[i][1]-pts[j][1], dz=pts[i][2]-pts[j][2];
+    if(dx*dx+dy*dy+dz*dz < LINK*LINK*.5) edges.push([i,j]);
+  }
+  let W=0,H=0,dpr=1, ry=0, rx=.35, tx=.35, ty=0, visible=true;
+  function size(){ dpr = Math.min(devicePixelRatio||1, 2); const b = cv.getBoundingClientRect(); W=b.width; H=b.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  size(); new ResizeObserver(()=>{ size(); draw(); }).observe(cv);
+  const proj = new Array(N);
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const cx=W/2, cy=H/2, R=Math.min(W,H)*.36;
+    const g = ctx.createRadialGradient(cx,cy,R*.1,cx,cy,R*1.5);
+    g.addColorStop(0,"rgba(124,92,255,.32)"); g.addColorStop(.55,"rgba(34,211,238,.08)"); g.addColorStop(1,"rgba(8,7,19,0)");
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    const cY=Math.cos(ry), sY=Math.sin(ry), cX=Math.cos(rx), sX=Math.sin(rx);
+    for(let i=0;i<N;i++){
+      let [x,y,z]=pts[i];
+      let x1=x*cY+z*sY, z1=-x*sY+z*cY;
+      let y1=y*cX-z1*sX, z2=y*sX+z1*cX;
+      const s = 1/(1.9 - z2*.55);
+      proj[i] = [cx + x1*R*s*1.55, cy + y1*R*s*1.55, z2];
+    }
+    ctx.lineWidth = 1;
+    for(const [i,j] of edges){
+      const a=proj[i], b=proj[j], d=(a[2]+b[2])/2;
+      const al = .12 + (d+1)/2*.5;
+      ctx.strokeStyle = d>0 ? `rgba(167,139,250,${al})` : `rgba(34,211,238,${al*.7})`;
+      ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke();
+    }
+    for(let i=0;i<N;i++){
+      const p=proj[i], d=(p[2]+1)/2, r=1+d*2.1;
+      ctx.fillStyle = i%5===0 ? `rgba(34,211,238,${.45+d*.55})` : `rgba(196,181,253,${.35+d*.65})`;
+      ctx.beginPath(); ctx.arc(p[0],p[1],r,0,6.283); ctx.fill();
+    }
+  }
+  const wrap = cv.parentElement;
+  wrap.parentElement.addEventListener("pointermove", e=>{
+    const b = cv.getBoundingClientRect();
+    ty = ((e.clientX-b.left)/b.width-.5)*.9; tx = .35 + ((e.clientY-b.top)/b.height-.5)*.6;
+  });
+  if("IntersectionObserver" in window) new IntersectionObserver(es=>visible = es[0].isIntersecting).observe(cv);
+  let t0=0;
+  function frame(t){
+    requestAnimationFrame(frame);
+    if(!visible || !orbActive || document.hidden) return;
+    if(reduceMotion.matches) return;
+    ry += .0032; rx += (tx - rx)*.04; ry += ty*.0016;
+    draw();
+  }
+  draw();
+  if(!reduceMotion.matches) requestAnimationFrame(frame);
+  reduceMotion.addEventListener?.("change", ()=>{ draw(); if(!reduceMotion.matches) requestAnimationFrame(frame); });
+})();
+
+/* ============================================================ */
+if("scrollRestoration" in history) history.scrollRestoration = "manual";   // refresh must not restore an old scroll position
+window.addEventListener("hashchange", route);
+observeReveals(document);
+route();
+</script>
+</body>
+</html>
