@@ -307,6 +307,38 @@ input[type=range].rng::-moz-range-thumb{width:16px;height:16px;border:0;border-r
 .syncbox .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
 .syncbox .btn{padding:8px 14px;font-size:.85rem}
 
+/* ===== flipbook viewer ===== */
+.fb{display:grid;gap:14px;outline:none}
+.fb-stage{position:relative;display:grid;place-items:center;padding:18px 8px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--card-line);
+  background:radial-gradient(60% 70% at 50% 35%,rgba(124,92,255,.22),transparent 72%),rgba(0,0,0,.25);perspective:2400px;cursor:pointer;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.fb-book{position:relative;width:min(100%,900px);aspect-ratio:10/7;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.4,.1,.2,1)}
+.fb-leaf{position:absolute;top:0;left:50%;width:50%;height:100%;transform-origin:left center;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.45,.05,.25,1)}
+.fb-leaf.turned{transform:rotateY(-180deg)}
+.fb-face{position:absolute;inset:0;overflow:hidden;background:#15122f;border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 34px -16px rgba(0,0,0,.75);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.fb-front{border-radius:2px 10px 10px 2px}
+.fb-back{border-radius:10px 2px 2px 10px;transform:rotateY(180deg)}
+.fb-front::after,.fb-back::after{content:"";position:absolute;top:0;bottom:0;width:9%;pointer-events:none}
+.fb-front::after{left:0;background:linear-gradient(90deg,rgba(0,0,0,.35),transparent)}
+.fb-back::after{right:0;background:linear-gradient(270deg,rgba(0,0,0,.35),transparent)}
+.fb-face img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.fb-blank{width:100%;height:100%;background:linear-gradient(160deg,#16132f,#0e0c22)}
+.fb-sample{width:100%;height:100%;display:grid;place-content:center;gap:6px;text-align:center;padding:12%;
+  background:radial-gradient(circle at 30% 20%,rgba(168,85,247,.35),transparent 60%),radial-gradient(circle at 80% 85%,rgba(56,189,248,.28),transparent 60%),#15122f}
+.fb-sample b{font:700 clamp(1.6rem,5vw,3rem)/1 var(--font-display);background:var(--head-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.fb-sample span{font:500 .66rem var(--font-mono);letter-spacing:.24em;text-transform:uppercase;color:#94a3b8}
+.fb-book.single{width:min(100%,420px);aspect-ratio:5/7;transform:none!important}
+.fb-sheet{position:absolute;inset:0;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.1);background:#15122f}
+.fb-ctrl{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.fb-ctrl .btn{padding:10px 18px;font-size:.88rem}
+.fb-ctrl .btn[disabled]{opacity:.35;pointer-events:none}
+.fb-status{min-width:170px;text-align:center;font:500 .78rem var(--font-mono);letter-spacing:.14em;color:#cbd5e1;text-transform:uppercase}
+.fb-demo{color:#fde68a}
+.fb:fullscreen{background:#05040d;padding:16px;align-content:center;gap:16px}
+.fb:fullscreen .fb-stage{border:0;background:none}
+.fb:fullscreen .fb-book{width:min(96vw,calc((100vh - 120px)*10/7))}
+.fb:fullscreen .fb-book.single{width:min(92vw,calc((100vh - 120px)*5/7))}
+@media (max-width:720px){.fb-stage{padding:12px 6px}}
+
 /* generic media container */
 .mediabox{aspect-ratio:16/9;border-radius:var(--radius);border:1px dashed var(--violet);background:repeating-linear-gradient(45deg,rgba(139,92,246,.06) 0 14px,transparent 14px 28px);display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted)}
 .mediabox b{display:block;color:#fff;font:700 1.15rem var(--font-display);margin:10px 0 4px}
@@ -757,15 +789,141 @@ function songPage(p){
 }
 
 /* ---------- Generic (WIP) project page ---------- */
+/* ---------- Flipbook viewer ----------
+   Add the finished pages here, in reading order (page 1 = front cover):
+     FLIPBOOK.pages = [{src:"assets/flipbook/page-01.webp", alt:"Cover: …"}, {src:"assets/flipbook/page-02.webp", alt:"…"}, …]
+   Open the page with ?flipdemo=1 to preview the viewer with clearly labelled sample pages. */
+const FLIPBOOK = { pages: [], pdf: "" };
+
+function flipDemoOn(){ return new URLSearchParams(location.search).get("flipdemo") === "1"; }
+function flipPages(){
+  if(FLIPBOOK.pages.length) return FLIPBOOK.pages;
+  if(flipDemoOn()) return Array.from({length:10}, (_,i)=>({sample:true, n:i+1, alt:`Sample page ${i+1}`}));
+  return [];
+}
+function fbFaceHTML(pg, i){
+  if(!pg) return `<div class="fb-blank"></div>`;
+  if(pg.sample) return `<div class="fb-sample" role="img" aria-label="${esc(pg.alt)}"><b>${pg.n}</b><span>Sample page</span></div>`;
+  return `<img src="${esc(pg.src)}" alt="${esc(pg.alt || `Page ${i+1}`)}" ${i<4 ? "" : 'loading="lazy"'} decoding="async" draggable="false">`;
+}
+function flipbookHTML(pages){
+  const demo = !!pages[0]?.sample;
+  return `<div class="fb" id="fb" tabindex="0" role="region" aria-roledescription="flipbook" aria-label="Digital flipbook, ${pages.length} pages. Use the arrow keys to turn pages.">
+    <div class="fb-stage" id="fbStage"><div class="fb-book" id="fbBook"></div></div>
+    <div class="fb-ctrl">
+      <button class="btn" id="fbPrev" type="button" aria-label="Previous page">&larr; Prev</button>
+      <div class="fb-status" id="fbStatus" role="status" aria-live="polite"></div>
+      <button class="btn" id="fbNext" type="button" aria-label="Next page">Next &rarr;</button>
+      <button class="btn" id="fbFs" type="button" aria-label="Toggle fullscreen">⤢ Fullscreen</button>
+      ${FLIPBOOK.pdf ? `<a class="btn" href="${esc(FLIPBOOK.pdf)}" target="_blank" rel="noopener">PDF</a>` : ""}
+    </div>
+    ${demo ? `<p class="note fb-demo" style="text-align:center">Sample layout preview — these are placeholder pages, not project content.</p>` : ""}
+  </div>`;
+}
+
+let fbCleanup = null;
+function cleanupFlipbook(){ if(fbCleanup){ fbCleanup(); fbCleanup = null; } }
+
+function initFlipbook(pages){
+  const root = $("#fb"); if(!root) return;
+  const stage = $("#fbStage"), book = $("#fbBook"), status = $("#fbStatus"), prevB = $("#fbPrev"), nextB = $("#fbNext"), fsB = $("#fbFs");
+  const N = pages.length, L = Math.ceil(N/2), mq = matchMedia("(min-width: 720px)");
+  let spread = mq.matches, cur = 0, leaves = [], moving = -1, sheet = null, busy = false;
+
+  function build(){
+    book.className = "fb-book" + (spread ? "" : " single");
+    book.style.transform = "";
+    if(spread){
+      book.innerHTML = Array.from({length:L}, (_,k)=>
+        `<div class="fb-leaf"><div class="fb-face fb-front">${fbFaceHTML(pages[2*k], 2*k)}</div><div class="fb-face fb-back">${fbFaceHTML(pages[2*k+1], 2*k+1)}</div></div>`).join("");
+      leaves = $$(".fb-leaf", book); sheet = null;
+    }else{
+      book.innerHTML = `<div class="fb-sheet" id="fbSheet">${fbFaceHTML(pages[cur], cur)}</div>`;
+      sheet = $("#fbSheet"); leaves = [];
+    }
+    paint();
+  }
+  function paint(){
+    if(spread){
+      leaves.forEach((lf,k)=>{
+        lf.classList.toggle("turned", k < cur);
+        if(k !== moving) lf.style.zIndex = k < cur ? k+1 : L-k;
+      });
+      book.style.transform = cur === 0 ? "translateX(-25%)" : (cur === L ? "translateX(25%)" : "");
+      prevB.disabled = cur === 0; nextB.disabled = cur === L;
+      if(cur === 0) status.textContent = `Cover · 1 / ${N}`;
+      else if(2*cur+1 > N) status.textContent = `Page ${2*cur} / ${N}`;
+      else status.textContent = `Pages ${2*cur}–${2*cur+1} / ${N}`;
+    }else{
+      prevB.disabled = cur === 0; nextB.disabled = cur === N-1;
+      status.textContent = cur === 0 ? `Cover · 1 / ${N}` : `Page ${cur+1} / ${N}`;
+    }
+  }
+  function turn(d){
+    if(busy) return;
+    if(spread){
+      const nxt = cur + d; if(nxt < 0 || nxt > L) return;
+      const k = d > 0 ? cur : cur - 1, lf = leaves[k];
+      busy = true; moving = k; lf.style.zIndex = L + 5;      // the turning leaf stays on top until it lands
+      cur = nxt; paint();
+      setTimeout(()=>{ moving = -1; busy = false; paint(); }, reduceMotion.matches ? 0 : 920);
+    }else{
+      const nxt = cur + d; if(nxt < 0 || nxt > N-1) return;
+      cur = nxt; sheet.innerHTML = fbFaceHTML(pages[cur], cur); paint();
+      if(!reduceMotion.matches && sheet.animate) sheet.animate([{opacity:0, transform:`translateX(${d*28}px)`},{opacity:1, transform:"none"}], {duration:320, easing:"ease-out"});
+    }
+  }
+  prevB.addEventListener("click", ()=>turn(-1));
+  nextB.addEventListener("click", ()=>turn(1));
+
+  // click left/right half, or swipe
+  let down = null;
+  stage.addEventListener("pointerdown", e=>{ down = {x:e.clientX, y:e.clientY}; });
+  stage.addEventListener("pointerup", e=>{
+    if(!down) return; const dx = e.clientX - down.x, dy = e.clientY - down.y; down = null;
+    if(Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)){ turn(dx < 0 ? 1 : -1); return; }
+    if(Math.abs(dx) > 8 || Math.abs(dy) > 8) return;
+    const b = stage.getBoundingClientRect(); turn(e.clientX > b.left + b.width/2 ? 1 : -1);
+  });
+  stage.addEventListener("pointercancel", ()=>{ down = null; });
+
+  const onKey = e=>{
+    if(!$("#fb")) return;
+    if(/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName)) return;
+    if(e.key === "ArrowRight"){ e.preventDefault(); turn(1); }
+    else if(e.key === "ArrowLeft"){ e.preventDefault(); turn(-1); }
+  };
+  document.addEventListener("keydown", onKey);
+
+  // fullscreen
+  if(!document.fullscreenEnabled) fsB.hidden = true;
+  fsB.addEventListener("click", ()=>{ document.fullscreenElement ? document.exitFullscreen() : root.requestFullscreen?.(); });
+
+  // switch between two-page and single-page layouts when the window crosses 720px
+  const onMq = ()=>{
+    const now = mq.matches; if(now === spread) return;
+    cur = now ? Math.ceil(cur/2) : (cur === 0 ? 0 : 2*cur-1);
+    spread = now; moving = -1; busy = false; build();
+  };
+  mq.addEventListener("change", onMq);
+
+  fbCleanup = ()=>{ document.removeEventListener("keydown", onKey); mq.removeEventListener("change", onMq); if(document.fullscreenElement) document.exitFullscreen?.(); };
+  build();
+}
+
 function genericPage(p){
+  const fbPages = p.key==="flipbook" ? flipPages() : [];
+  const media = fbPages.length ? flipbookHTML(fbPages)
+    : `<div class="mediabox"><div><span class="badge wip">Work in progress</span><b>${esc(p.media.label)}</b><span>${esc(p.media.hint)}</span></div></div>`;
   return `
   <div class="phero reveal">
     <div class="meta"><span class="eyebrow">${p.n} — ${esc(p.cat)}</span><span class="badge wip">Work in progress</span></div>
     <h1>${esc(p.title)}</h1>
   </div>
+  ${fbPages.length ? `<div class="reveal" style="margin-bottom:26px">${media}</div>` : ""}
   <div class="pgrid2">
     <div class="stack">
-      <div class="reveal"><div class="mediabox"><div><span class="badge wip">Work in progress</span><b>${esc(p.media.label)}</b><span>${esc(p.media.hint)}</span></div></div></div>
+      ${fbPages.length ? "" : `<div class="reveal">${media}</div>`}
       ${panel("Project Overview",`<p>${esc(p.overview)}</p>`,"reveal")}
       ${panel("Creative Process",`<ol class="steps">${p.process.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`,"reveal")}
       ${panel("Reflection",`<p>${esc(p.reflection)}</p>`,"reveal")}
@@ -796,7 +954,7 @@ function route(){
     history.replaceState(null, "", location.pathname + location.search);
   }
   closeMenu();
-  stopAudio();
+  stopAudio(); cleanupFlipbook();
   if(BYKEY[raw]){
     showProject(BYKEY[raw]);
     return;
@@ -843,6 +1001,7 @@ function showProject(p){
   observeReveals(projEl);
   if(p.kind==="image") initImagePage();
   if(p.kind==="song") initSongPage();
+  if(p.key==="flipbook"){ const fp = flipPages(); if(fp.length) initFlipbook(fp); }
   const h1 = $("h1",projEl); if(h1){ h1.setAttribute("tabindex","-1"); h1.focus({preventScroll:true}); }
 }
 
