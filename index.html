@@ -337,6 +337,16 @@ input[type=range].rng::-moz-range-thumb{width:16px;height:16px;border:0;border-r
 .fb:fullscreen .fb-stage{border:0;background:none}
 .fb:fullscreen .fb-book{width:min(96vw,calc((100vh - 120px)*10/7))}
 .fb:fullscreen .fb-book.single{width:min(92vw,calc((100vh - 120px)*5/7))}
+.fb-ctrl .fb-beta{margin-left:6px;padding:1px 7px;border-radius:999px;border:1px solid rgba(250,204,21,.4);color:#fde68a;font:500 .58rem var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
+.fb-ctrl .btn[aria-pressed="true"]{border-color:rgba(56,189,248,.7);background:rgba(56,189,248,.12)}
+.fb-cam{position:absolute;right:10px;bottom:10px;z-index:30;width:196px;padding:8px;border-radius:16px;cursor:default;
+  background:rgba(8,7,19,.82);border:1px solid var(--card-line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.fb-camv{position:relative;width:100%;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:#000}
+.fb-camv video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);opacity:.75}
+.fb-camv canvas{position:absolute;inset:0;width:100%;height:100%}
+.fb-hint{margin-top:8px;font:500 .72rem/1.4 var(--font-body);color:#e2e8f0}
+.fb-priv{margin-top:4px;font:400 .62rem/1.4 var(--font-body);color:#64748b}
+@media (max-width:720px){.fb-cam{width:150px;right:6px;bottom:6px;padding:6px}.fb-priv{display:none}}
 @media (max-width:720px){.fb-stage{padding:12px 6px}}
 
 /* generic media container */
@@ -809,19 +819,130 @@ function fbFaceHTML(pg, i){
 function flipbookHTML(pages){
   const demo = !!pages[0]?.sample;
   return `<div class="fb" id="fb" tabindex="0" role="region" aria-roledescription="flipbook" aria-label="Digital flipbook, ${pages.length} pages. Use the arrow keys to turn pages.">
-    <div class="fb-stage" id="fbStage"><div class="fb-book" id="fbBook"></div></div>
+    <div class="fb-stage" id="fbStage"><div class="fb-book" id="fbBook"></div>
+      <div class="fb-cam" id="fbCam" hidden><div class="fb-camv"><video id="fbVid" playsinline muted></video><canvas id="fbCanvas" width="176" height="132"></canvas></div><div class="fb-hint" id="fbHint" role="status" aria-live="polite"></div><div class="fb-priv">Camera stays on your device. Nothing is recorded or uploaded.</div></div></div>
     <div class="fb-ctrl">
       <button class="btn" id="fbPrev" type="button" aria-label="Previous page">&larr; Prev</button>
       <div class="fb-status" id="fbStatus" role="status" aria-live="polite"></div>
       <button class="btn" id="fbNext" type="button" aria-label="Next page">Next &rarr;</button>
       <button class="btn" id="fbFs" type="button" aria-label="Toggle fullscreen">⤢ Fullscreen</button>
+      <button class="btn" id="fbHand" type="button" aria-pressed="false" aria-label="Turn pages with hand gestures using your camera (beta)">✋ Hand control <small class="fb-beta">beta</small></button>
       ${FLIPBOOK.pdf ? `<a class="btn" href="${esc(FLIPBOOK.pdf)}" target="_blank" rel="noopener">PDF</a>` : ""}
     </div>
     ${demo ? `<p class="note fb-demo" style="text-align:center">Sample layout preview — these are placeholder pages, not project content.</p>` : ""}
   </div>`;
 }
 
-let fbCleanup = null;
+/* ---------- Hand control (prototype): swipe an open hand to turn pages ----------
+   Uses MediaPipe Hand Landmarker in the browser. The camera picture never leaves the device. */
+const MP_VER = "0.10.14";
+const MP_BASE = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}`;
+const MP_MODEL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
+
+/* the model loader lives in one object so tests can swap in a fake */
+const HandBackend = {
+  async create(){
+    const { FilesetResolver, HandLandmarker } = await import(`${MP_BASE}/vision_bundle.mjs`);
+    const files = await FilesetResolver.forVisionTasks(`${MP_BASE}/wasm`);
+    const opts = delegate => ({ baseOptions:{ modelAssetPath: MP_MODEL, delegate }, runningMode:"VIDEO", numHands:1, minHandDetectionConfidence:.6, minHandPresenceConfidence:.6, minTrackingConfidence:.5 });
+    try{ return await HandLandmarker.createFromOptions(files, opts("GPU")); }
+    catch(e){ return await HandLandmarker.createFromOptions(files, opts("CPU")); }
+  }
+};
+
+/* pure gesture logic (no camera needed): returns +1 = next page, -1 = previous page, 0 = nothing.
+   x is the hand position across the picture (0..1), already mirrored so "left" is the user's left. */
+function createSwipeDetector(o = {}){
+  const win = o.windowMs ?? 500, minDx = o.minDx ?? .22, minSpeed = o.minSpeed ?? .5, cooldown = o.cooldownMs ?? 1000, minFrames = o.minFrames ?? 4;
+  let buf = [], lastFire = -1e9;
+  return {
+    reset(){ buf = []; },
+    push(t, x, open){
+      if(!open){ buf = []; return 0; }                       // only an open hand can swipe
+      buf.push([t, x]);
+      while(buf.length && t - buf[0][0] > win) buf.shift();
+      if(t - lastFire < cooldown || buf.length < minFrames) return 0;
+      const dx = x - buf[0][1], dt = (t - buf[0][0]) / 1000;
+      if(dt > 0 && Math.abs(dx) >= minDx && Math.abs(dx)/dt >= minSpeed){
+        lastFire = t; buf = [];
+        return dx < 0 ? 1 : -1;                              // hand moves left -> next page
+      }
+      return 0;
+    }
+  };
+}
+function isOpenHand(lm){
+  const d = (a,b)=>Math.hypot(a.x-b.x, a.y-b.y);
+  let up = 0;
+  for(const [tip,pip] of [[8,6],[12,10],[16,14],[20,18]]) if(d(lm[tip],lm[0]) > d(lm[pip],lm[0]) * 1.12) up++;
+  return up >= 3;
+}
+const HAND_BONES = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+
+function initHandControl({ turn, stage }){
+  const btn = $("#fbHand"), cam = $("#fbCam"), video = $("#fbVid"), cv = $("#fbCanvas"), hint = $("#fbHint");
+  const noop = { stop(){} };
+  if(!btn) return noop;
+  if(!navigator.mediaDevices?.getUserMedia){ btn.hidden = true; return noop; }
+  const ctx = cv.getContext("2d");
+  let landmarker = null, stream = null, active = false, timer = 0, starting = false, lastT = -1, lastRun = 0, flashUntil = 0;
+  const detector = createSwipeDetector();
+  const say = t => { hint.textContent = t; };
+
+  function draw(lm, open){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    if(!lm) return;
+    const X = p => (1 - p.x) * cv.width, Y = p => p.y * cv.height;     // picture is mirrored like a mirror
+    ctx.lineWidth = 2; ctx.strokeStyle = open ? "rgba(56,189,248,.95)" : "rgba(244,114,182,.9)";
+    ctx.beginPath(); for(const [a,b] of HAND_BONES){ ctx.moveTo(X(lm[a]),Y(lm[a])); ctx.lineTo(X(lm[b]),Y(lm[b])); } ctx.stroke();
+    ctx.fillStyle = "#fff"; for(const p of lm){ ctx.beginPath(); ctx.arc(X(p),Y(p),2.2,0,6.283); ctx.fill(); }
+  }
+  function loop(){
+    if(!active) return;
+    timer = setTimeout(loop, 34);
+    const now = performance.now();
+    if(video.readyState < 2 || video.currentTime === lastT || now - lastRun < 30) return;
+    lastT = video.currentTime; lastRun = now;
+    let res; try{ res = landmarker.detectForVideo(video, now); }catch(e){ return; }
+    const lm = res?.landmarks?.[0];
+    if(!lm){ detector.reset(); draw(null); if(now > flashUntil) say("No hand detected. Show your open hand."); return; }
+    const open = isOpenHand(lm), cx = 1 - (lm[0].x + lm[5].x + lm[9].x + lm[13].x + lm[17].x) / 5;
+    draw(lm, open);
+    if(now > flashUntil) say(open ? "✋ Swipe left or right to turn the page" : "Open your hand (fingers apart) to swipe");
+    const dir = detector.push(now, cx, open);
+    if(dir){ turn(dir); flashUntil = now + 1100; say(dir > 0 ? "← Next page" : "Previous page →"); }
+  }
+  function stop(msg){
+    active = false; starting = false; clearTimeout(timer);
+    stream?.getTracks().forEach(t => t.stop()); stream = null; video.srcObject = null;
+    detector.reset(); draw(null);
+    btn.setAttribute("aria-pressed","false"); btn.disabled = false; btn.firstChild.textContent = "✋ Hand control ";
+    if(msg){ say(msg); cam.hidden = false; setTimeout(()=>{ if(!active) cam.hidden = true; }, 5000); } else cam.hidden = true;
+  }
+  async function start(){
+    if(active || starting) return;
+    starting = true; btn.disabled = true; cam.hidden = false; say("Asking for camera permission…");
+    try{
+      stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"user", width:{ideal:640}, height:{ideal:480} }, audio:false });
+      video.srcObject = stream; await video.play();
+      if(!landmarker){ say("Loading hand model (first time only)…"); landmarker = await HandBackend.create(); }
+      active = true; starting = false; btn.disabled = false; lastT = -1;
+      btn.setAttribute("aria-pressed","true"); btn.firstChild.textContent = "✋ Stop hand control ";
+      say("✋ Swipe left or right to turn the page"); loop();
+    }catch(e){
+      const name = e?.name || "";
+      stop(name === "NotAllowedError" ? "Camera permission was blocked. You can still use the buttons."
+         : name === "NotFoundError" ? "No camera was found. You can still use the buttons."
+         : "Hand control could not start. You can still use the buttons.");
+    }
+  }
+  btn.addEventListener("click", ()=>{ active || starting ? stop() : start(); });
+  document.addEventListener("visibilitychange", onHide);
+  function onHide(){ if(document.hidden && active) stop(); }
+  return { stop(){ document.removeEventListener("visibilitychange", onHide); stop(); } };
+}
+
+ let fbCleanup = null;
 function cleanupFlipbook(){ if(fbCleanup){ fbCleanup(); fbCleanup = null; } }
 
 function initFlipbook(pages){
@@ -880,7 +1001,8 @@ function initFlipbook(pages){
   let down = null;
   stage.addEventListener("pointerdown", e=>{ down = {x:e.clientX, y:e.clientY}; });
   stage.addEventListener("pointerup", e=>{
-    if(!down) return; const dx = e.clientX - down.x, dy = e.clientY - down.y; down = null;
+    if(!down) return; if(e.target.closest(".fb-cam")){ down = null; return; }
+    const dx = e.clientX - down.x, dy = e.clientY - down.y; down = null;
     if(Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)){ turn(dx < 0 ? 1 : -1); return; }
     if(Math.abs(dx) > 8 || Math.abs(dy) > 8) return;
     const b = stage.getBoundingClientRect(); turn(e.clientX > b.left + b.width/2 ? 1 : -1);
@@ -907,7 +1029,8 @@ function initFlipbook(pages){
   };
   mq.addEventListener("change", onMq);
 
-  fbCleanup = ()=>{ document.removeEventListener("keydown", onKey); mq.removeEventListener("change", onMq); if(document.fullscreenElement) document.exitFullscreen?.(); };
+  const hand = initHandControl({ turn, stage });
+  fbCleanup = ()=>{ hand.stop(); document.removeEventListener("keydown", onKey); mq.removeEventListener("change", onMq); if(document.fullscreenElement) document.exitFullscreen?.(); };
   build();
 }
 
