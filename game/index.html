@@ -40,6 +40,10 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:400 15
 .stars{font-size:26px;color:var(--gold);letter-spacing:4px}
 #load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);font:600 16px Unbounded,sans-serif;z-index:5}
 .note{font-size:12px;color:var(--mut)}
+#prompt{position:fixed;left:50%;transform:translateX(-50%);bottom:64px;display:none;font-size:15px;padding:11px 20px;box-shadow:0 6px 24px rgba(0,0,0,.45)}
+#joy{position:fixed;left:18px;bottom:78px;width:104px;height:104px;border-radius:50%;border:1px solid var(--line);background:rgba(22,17,42,.55);display:none;touch-action:none}
+#joy i{position:absolute;left:34px;top:34px;width:36px;height:36px;border-radius:50%;background:var(--acc);opacity:.85}
+@media (pointer:coarse){#joy{display:block}}
 @media (max-width:700px){#panel{left:10px;right:10px;top:auto;bottom:62px;width:auto;max-height:55vh}.hint{display:none}.brand{font-size:13px}}
 </style>
 </head>
@@ -51,22 +55,24 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:400 15
   <div style="display:flex;gap:8px"><button class="btn" id="bHelp" data-t="help">Bantuan</button><button class="btn" id="bLang">English</button></div>
 </div>
 <div id="panel" role="dialog" aria-live="polite"></div>
-<div class="hint" id="hint" data-t="hint">Seret untuk pusing, klik objek untuk main</div>
+<div class="hint" id="hint" data-t="hint"></div>
+<button class="btn pri" id="prompt"></button>
+<div id="joy" aria-label="Joystick"><i></i></div>
 <div class="stations" id="stations"></div>
 
 <script type="module">
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 /* ---------- language ---------- */
 let lang = "ms";
 const T = p => (typeof p === "string" ? p : p[lang === "ms" ? 0 : 1]);
 const UI = {
   back:["Portfolio","Portfolio"], title:["Studio Batik Pelangi","Batik Pelangi Studio"],
-  help:["Bantuan","Help"], hint:["Seret untuk pusing, klik objek untuk main","Drag to look around, click an object to play"],
+  help:["Bantuan","Help"], hint:["Jalan dengan anak panah atau WASD, atau ketik lantai. Tekan E di stesen.","Walk with the arrow keys or WASD, or tap the floor. Press E at a station."],
+  play:["Main","Play"], locked:["Selesaikan stesen sebelum ini dahulu.","Finish the previous station first."],
   close:["Tutup","Close"], check:["Semak","Check"], retry:["Cuba lagi","Try again"],
-  helpText:["Selesaikan 5 stesen dalam studio, kemudian jawab soalan di pintu. Klik objek dalam bilik atau butang di bawah. Ada tiga bintang untuk markah terbaik.","Solve the 5 stations in the studio, then answer the questions at the door. Click an object in the room or the buttons below. Three stars is the best score."],
+  helpText:["Jalan di sepanjang lorong dengan anak panah, WASD, joystick atau ketik lantai. Dekati setiap stesen dan tekan E atau butang Main. Tali penghadang terbuka selepas stesen siap. Di hujung lorong, jawab soalan di pintu. Tiga bintang ialah markah terbaik.","Walk along the corridor with the arrow keys, WASD, the joystick or by tapping the floor. Go up to each station and press E or the Play button. A rope barrier opens when the station is done. At the end of the corridor, answer the questions at the door. Three stars is the best score."],
   allOk:["Betul semua. Stesen siap.","All correct. Station complete."], someBad:["Ada yang belum tepat. Cuba lagi.","Some are not right yet. Try again."]
 };
 const U = k => T(UI[k]);
@@ -120,67 +126,74 @@ const canvas = $("#c");
 const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x2a2140);
-const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 60);
-scene.add(new THREE.HemisphereLight(0xfff4e0, 0x6b5a8e, 1.15));
-const sun = new THREE.DirectionalLight(0xffffff, 1.25); sun.position.set(5, 9, 6); scene.add(sun);
-const lampL = new THREE.PointLight(0xffd9a0, 18, 9); lampL.position.set(0.3, 2.9, -0.3); scene.add(lampL);
-const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true; controls.enablePan = false; controls.minDistance = 3; controls.maxDistance = 16;
-controls.minPolarAngle = 0.35; controls.maxPolarAngle = 1.38; controls.minAzimuthAngle = -0.7; controls.maxAzimuthAngle = 1.9;
-const HOME = {pos:new THREE.Vector3(7.2, 6.2, 8.2), tgt:new THREE.Vector3(0, 1.1, -0.8)};
-camera.position.copy(HOME.pos); controls.target.copy(HOME.tgt);
-
-let stationMeshes = {}, doorPivot = null, doorTarget = 0, clothSlot = null, hover = null, tween = null;
-const nodes = {};
-
+const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 80);
+scene.add(new THREE.HemisphereLight(0xfff4e0, 0x6b5a8e, 1.2));
+const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(6, 10, 8); scene.add(sun);
+const SXS = {rack:5.5, map:11.5, motif:17.5, tools:23.5, table:29.5, door:34.6}, GATES = [8.5, 14.5, 20.5, 26.5, 32.5];
+const H = {obj:null, x:1.5, z:0.8, face:0.3, phase:0, parts:{}};
+const gates = [], nodes = {}, stationMeshes = {};
+let doorPivot = null, doorTarget = 0, clothSlot = null, goal = null, near = null;
+const camPos = new THREE.Vector3(-3, 6, 9), camLook = new THREE.Vector3(4, 1, 0);
 function size(){ const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 addEventListener("resize", size); size();
 
-new GLTFLoader().load("../assets/game/studio.glb", g => {
+new GLTFLoader().load("../assets/game/corridor.glb", g => {
   scene.add(g.scene);
-  g.scene.traverse(o => { if (o.isMesh) o.material = o.material.clone(); });
   ST.forEach(s => {
     const n = g.scene.getObjectByName(s.node); nodes[s.id] = n; stationMeshes[s.id] = [];
-    n.traverse(o => { if (o.isMesh) { o.userData.st = s.id; stationMeshes[s.id].push(o); } });
+    n.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.userData.st = s.id; stationMeshes[s.id].push(o); } });
   });
+  GATES.forEach((_, i) => gates.push(g.scene.getObjectByName("gate_" + (i + 1))));
   doorPivot = g.scene.getObjectByName("door_pivot");
   clothSlot = g.scene.getObjectByName("cloth_slot");
-  if (clothSlot) clothSlot.material.side = THREE.DoubleSide;
-  $("#load").remove();
-  refresh();
+  if (clothSlot){ clothSlot.material = clothSlot.material.clone(); clothSlot.material.side = THREE.DoubleSide; }
+  H.obj = g.scene.getObjectByName("hero");
+  ["legL", "legR", "armL", "armR"].forEach(n => H.parts[n] = g.scene.getObjectByName(n));
+  $("#load").remove(); refresh(); say(U("hint"), 6000);
 }, undefined, () => { $("#load").textContent = "Gagal memuatkan model 3D / Could not load the 3D model"; });
 
-function worldCenter(id){ const b = new THREE.Box3().setFromObject(nodes[id]); return b.getCenter(new THREE.Vector3()); }
-function flyTo(pos, tgt){ tween = {t0:performance.now(), d:700, p0:camera.position.clone(), g0:controls.target.clone(), p1:pos, g1:tgt}; }
-function focus(id){
-  if (!nodes[id]) return;
-  const c = worldCenter(id); c.y = Math.max(c.y, 1.0);
-  const dir = HOME.pos.clone().sub(c).setY(0).normalize();
-  const far = innerWidth < 700 ? 6.8 : 5.2;
-  flyTo(c.clone().add(dir.multiplyScalar(far)).add(new THREE.Vector3(0, 2.2, 0)), c);
+let sayT = 0;
+function say(msg, ms){ const h = $("#hint"); h.textContent = msg; h.style.display = "block"; clearTimeout(sayT); if (ms) sayT = setTimeout(() => h.style.display = "none", ms); }
+
+/* movement */
+const keys = {}, joy = {x:0, y:0};
+addEventListener("keydown", e => {
+  const k = e.key.toLowerCase(); if (["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(k)) e.preventDefault();
+  keys[k] = true;
+  if ((k === "e" || k === "enter" || k === " ") && near && !S.cur) openStation(near);
+  if (k === "escape" && S.cur) closePanel();
+});
+addEventListener("keyup", e => { keys[e.key.toLowerCase()] = false; });
+function limitX(){ for (let i = 0; i < GATES.length; i++) if (!S.done[ST[i].id]) return GATES[i] - 0.75; return 35.6; }
+function walkTo(id){
+  const x = SXS[id]; goal = {x:Math.min(x, limitX()), z:0.7, station:id};
+  if (x > limitX() + 0.1) say(U("locked"), 3000);
 }
 
-/* picking */
-const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
-function pickAt(e){
-  const r = canvas.getBoundingClientRect(); mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
-  ray.setFromCamera(mouse, camera);
-  const hit = ray.intersectObjects(Object.values(stationMeshes).flat(), false)[0];
-  return hit ? hit.object.userData.st : null;
-}
-function setHover(id){
-  if (id === hover) return;
-  if (hover) stationMeshes[hover].forEach(m => m.material.emissive.setHex(0x000000));
-  hover = id; canvas.style.cursor = id ? "pointer" : "grab";
-  if (id) stationMeshes[id].forEach(m => m.material.emissive.setHex(0x2a3b55));
-}
-canvas.addEventListener("pointermove", e => { if (e.pointerType === "mouse") setHover(pickAt(e)); });
+/* picking: tap a station to walk to it, tap the floor to walk there */
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), floor = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 let down = null;
 canvas.addEventListener("pointerdown", e => { down = {x:e.clientX, y:e.clientY}; });
 canvas.addEventListener("pointerup", e => {
   if (!down) return; const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y); down = null;
-  if (moved > 6) return; const id = pickAt(e); if (id) openStation(id);
+  if (moved > 8 || S.cur) return;
+  const r = canvas.getBoundingClientRect(); mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(Object.values(stationMeshes).flat(), false)[0];
+  if (hit){ walkTo(hit.object.userData.st); return; }
+  const p = new THREE.Vector3(); if (ray.ray.intersectPlane(floor, p)){ goal = {x:p.x, z:p.z, station:null}; if (p.x > limitX() + 0.3) say(U("locked"), 2500); }
 });
+/* joystick */
+const joyEl = $("#joy"), knob = joyEl.querySelector("i"); let joyId = null;
+function joyMove(e){
+  const r = joyEl.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2), m = Math.min(1, Math.hypot(dx, dy) / 40), a = Math.atan2(dy, dx);
+  joy.x = Math.cos(a) * m; joy.y = Math.sin(a) * m; knob.style.transform = "translate(" + joy.x * 34 + "px," + joy.y * 34 + "px)";
+}
+joyEl.addEventListener("pointerdown", e => { joyId = e.pointerId; joyEl.setPointerCapture(e.pointerId); joyMove(e); });
+joyEl.addEventListener("pointermove", e => { if (e.pointerId === joyId) joyMove(e); });
+const joyEnd = e => { if (e.pointerId === joyId){ joyId = null; joy.x = joy.y = 0; knob.style.transform = ""; } };
+joyEl.addEventListener("pointerup", joyEnd); joyEl.addEventListener("pointercancel", joyEnd);
+$("#prompt").addEventListener("click", () => { if (near && !S.cur) openStation(near); });
 
 /* cloth texture from the player's three colours */
 function makeCloth(cols){
@@ -212,10 +225,10 @@ function refresh(){
   if (S.cur) render();
 }
 function openStation(id){
-  if (id === "door" && !ST.slice(0, 5).every(s => S.done[s.id]) && !S.done.door){ S.cur = id; focus(id); panelShow(lockedHTML()); refresh(); return; }
-  S.cur = id; focus(id); render(); refresh();
+  if (id === "door" && !ST.slice(0, 5).every(s => S.done[s.id]) && !S.done.door){ S.cur = id; panelShow(lockedHTML()); refresh(); return; }
+  S.cur = id; goal = null; render(); refresh();
 }
-function closePanel(){ S.cur = null; panel.style.display = "none"; flyTo(HOME.pos.clone(), HOME.tgt.clone()); refresh(); }
+function closePanel(){ S.cur = null; panel.style.display = "none"; refresh(); }
 function panelShow(html){ panel.style.display = "block"; panel.innerHTML = `<button class="btn x" data-a="close">${U("close")}</button>${html}`; }
 function head(id){ const s = ST.find(x => x.id === id); return `<div class="kick">${esc(T(s.ch))}</div><h2>${esc(T(s.name))}</h2>`; }
 function lockedHTML(){
@@ -276,7 +289,7 @@ function endHTML(){
 }
 
 const ACT = {
-  open: d => openStation(d.id), close: () => closePanel(),
+  open: d => { if (near === d.id && !S.cur) openStation(d.id); else walkTo(d.id); }, close: () => closePanel(),
   pick: d => { const s = S.sel[d.s] || (S.sel[d.s] = {}); s[d.i] = d.v; S.checked[d.s] = false; render(); },
   check: d => {
     const set = SETS[d.s], sel = S.sel[d.s] || {}; let bad = 0;
@@ -309,20 +322,51 @@ const ACT = {
   },
   again: () => { location.reload(); }
 };
-function celebrate(id){ stationMeshes[id]?.forEach(m => m.material.color.offsetHSL(0, 0.08, 0.06)); }
+function celebrate(id){ stationMeshes[id]?.forEach(m => m.material.color.offsetHSL(0, 0.08, 0.06)); const i = ST.findIndex(s => s.id === id); if (i < GATES.length) say(lang === "ms" ? "Tali penghadang dibuka. Teruskan ke stesen seterusnya." : "The rope barrier is open. Move on to the next station.", 4000); }
 document.addEventListener("click", e => { const b = e.target.closest("[data-a]"); if (b && ACT[b.dataset.a]) ACT[b.dataset.a](b.dataset); });
 $("#bLang").addEventListener("click", () => { lang = lang === "ms" ? "en" : "ms"; refresh(); });
 $("#bHelp").addEventListener("click", () => { S.cur = null; panelShow(`<h2>${U("help")}</h2><p>${U("helpText")}</p>`); });
 
 /* loop */
-function tick(){
-  if (tween){ const k = Math.min(1, (performance.now() - tween.t0) / tween.d), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-    camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.g0, tween.g1, e); if (k >= 1) tween = null; }
+let last = performance.now();
+function tick(now){
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (H.obj){
+    const ix = (keys.arrowright || keys.d ? 1 : 0) - (keys.arrowleft || keys.a ? 1 : 0) + joy.x;
+    const iz = (keys.arrowdown || keys.s ? 1 : 0) - (keys.arrowup || keys.w ? 1 : 0) + joy.y;
+    let mx = 0, mz = 0;
+    if (!S.cur){
+      if (Math.abs(ix) + Math.abs(iz) > 0.12){ goal = null; const m = Math.hypot(ix, iz); mx = ix / Math.max(1, m); mz = iz / Math.max(1, m); }
+      else if (goal){
+        const dx = goal.x - H.x, dz = goal.z - H.z, d = Math.hypot(dx, dz);
+        if (d < 0.12){ const st = goal.station; goal = null; if (st) openStation(st); } else { mx = dx / d; mz = dz / d; }
+      }
+    }
+    const sp = 3.6, nx = Math.max(0.8, Math.min(limitX(), H.x + mx * sp * dt)), nz = Math.max(-1.4, Math.min(2.3, H.z + mz * sp * dt));
+    const moved = Math.hypot(nx - H.x, nz - H.z) > 1e-4;
+    if (goal && (mx || mz) && !moved) goal = null;
+    H.x = nx; H.z = nz;
+    if (moved){ const tf = Math.atan2(mx, mz); let df = tf - H.face; df = Math.atan2(Math.sin(df), Math.cos(df)); H.face += df * Math.min(1, dt * 12); H.phase += dt * 10; }
+    else H.phase *= 0.8;
+    const sw = moved ? Math.sin(H.phase) : H.phase * 0;
+    H.obj.position.set(H.x, moved ? Math.abs(Math.sin(H.phase)) * 0.04 : 0, H.z); H.obj.rotation.y = H.face;
+    const P = H.parts;
+    if (P.legL){ P.legL.rotation.x = sw * 0.7; P.legR.rotation.x = -sw * 0.7; P.armL.rotation.x = -sw * 0.6; P.armR.rotation.x = sw * 0.6; }
+    let n = null; for (const s of ST) if (Math.abs(H.x - SXS[s.id]) < 2.0) n = s.id;
+    const pb = $("#prompt");
+    if (n !== near){ near = n; }
+    if (near && !S.cur){ pb.style.display = "block"; pb.textContent = U("play") + ": " + T(ST.find(s => s.id === near).name) + "  [E]"; } else pb.style.display = "none";
+  }
+  gates.forEach((g, i) => { if (g){ const t = S.done[ST[i].id] ? -1.5 : 0; g.position.y += (t - g.position.y) * 0.08; } });
   if (doorPivot) doorPivot.rotation.y += (doorTarget - doorPivot.rotation.y) * 0.06;
-  controls.update(); renderer.render(scene, camera); requestAnimationFrame(tick);
+  const zoom = camera.aspect < 0.85 ? 1.45 : 1;
+  const tp = new THREE.Vector3(H.x + 2.4, 1.0, 0.2), cp = new THREE.Vector3(H.x - 3.2 * zoom, 5.6 * zoom, 8.6 * zoom);
+  camPos.lerp(cp, Math.min(1, dt * 4)); camLook.lerp(tp, Math.min(1, dt * 4));
+  camera.position.copy(camPos); camera.lookAt(camLook);
+  renderer.render(scene, camera); requestAnimationFrame(tick);
 }
-refresh(); tick();
-window.__game = {S, ACT, openStation};
+refresh(); requestAnimationFrame(tick);
+window.__game = {S, ACT, openStation, H, walkTo};
 </script>
 </body>
 </html>
