@@ -578,10 +578,16 @@ const PROJECTS = [
    short:"A personal photograph transformed into a semi-realistic anime-inspired AI portrait.", status:"done", thumb:ASSETS.ai, kind:"image"},
   {key:"song", n:"02", cat:"AI Song", title:"The Colors of My Voice", cardTitle:"The Colors of My Voice",
    short:"An original English song about art as a language of emotional expression, generated with Suno AI.", status:"done", kind:"song"},
-  GENERIC({key:"flipbook", n:"03", cat:"Digital Flipbook", title:"Digital Flipbook", cardTitle:"Digital Flipbook",
-   short:"An interactive digital flipbook for creative storytelling or educational presentation.", art:"book",
-   overview:"This page will present an interactive digital flipbook. The topic, story and target audience have not been confirmed yet.",
-   media:{type:"PDF / Flipbook", label:"Flipbook viewer", hint:"A PDF or flipbook embed will appear here once the file is provided."}}),
+  GENERIC({key:"flipbook", n:"03", cat:"Digital Flipbook", title:"Dari Kain Putih ke Pelangi", cardTitle:"Digital Flipbook",
+   short:"An interactive digital flipbook for creative storytelling or educational presentation.", art:"book", status:"done",
+   overview:"\"Dari Kain Putih ke Pelangi\" (From White Cloth to Rainbow) is a 12-page infographic flipbook about Malaysian batik, focusing on Batik Pelangi (tie-dye). It is based on Tajuk 6 (Seni Batik) of the Form 5 KSSM Visual Arts Education textbook and is written in Bahasa Melayu for Form 4 and 5 students. Turn the pages with the buttons, arrow keys, swipe, or the optional hand control.",
+   objectives:["Explain the basic principle of batik: wax or ties act as a colour resist.","Identify the parts of a batik cloth and the four motif categories: flora, fauna, geometric and abstract.","Tell apart four types of batik: Pelangi, Canting, Block and Screen.","Put the eight steps of making Batik Pelangi in the right order."],
+   tools:["Claude (text and layout)","ChatGPT Image Generation (illustrations)","Wikimedia Commons (open-licensed photos)","Notion (planning)"],
+   process:["Chose Seni Batik (Tajuk 6) from the Form 5 Visual Arts Education textbook, a craft with strong roots in Terengganu and Kelantan.","Planned the 12 pages in Notion: text, infographic layout and image prompts.","Claude wrote all the text in Bahasa Melayu in its own words (nothing copied from the textbook) and designed the infographic layout; ChatGPT generated the illustrations.","Added open-licensed photos from Wikimedia Commons, each with a caption and credit, and compiled everything into a PDF and this page viewer."],
+   reflection:"The student's own reflection will be added here.",
+   notes:`<p>Textbook used as a reference only: Kementerian Pendidikan Malaysia (2020). <i>Pendidikan Seni Visual Tingkatan 5 KSSM</i>, Tajuk 6: Seni Batik. Pustaka Sarjana. No text or images were copied.</p>
+     <p>Photos are from Wikimedia Commons and credited on the last page: Desmont4joy, Bahnfrend, Rulwarih, Ahaetulla, Apluswiki, Gunawan Kartapranata and Johann H. Addicks (CC BY-SA 3.0 or 4.0), and EmpAhmadK (CC0). Photos marked Indonesia show techniques, not Malaysian batik. Illustrations are AI-generated (ChatGPT).</p>`,
+   media:{type:"PDF / Flipbook", label:"Flipbook viewer", hint:"The flipbook pages will appear here."}}),
   GENERIC({key:"video", n:"04", cat:"AI Video", title:"AI Video", cardTitle:"AI Video",
    short:"A video project developed using AI tools for visual generation, editing or storytelling.", art:"play",
    overview:"This page will present a video project created with AI tools. The theme, story and tools have not been confirmed yet.",
@@ -639,7 +645,7 @@ const CARDS = {
             text:"A collection of AI-generated visual artworks created through prompt-based design and digital creativity."},
   song:    {label:"Music & Lyrics", title:"AI Song", tone:"sky", thumb:"assets/thumbs/ai-song.webp",
             text:"An AI-assisted music project featuring generated audio, lyrics, and creative sound exploration."},
-  flipbook:{label:"Interactive Storytelling", title:"Digital Flipbook", tone:"pink", thumb:"assets/thumbs/flipbook.webp",
+  flipbook:{label:"Interactive Storytelling", title:"Digital Flipbook", tone:"pink", thumb:"assets/flipbook/page-01.webp", pos:"50% 66%",
             text:"An interactive digital flipbook designed for creative storytelling or educational presentation."},
   video:   {label:"Motion & Story", title:"AI Video", tone:"violet", thumb:"assets/thumbs/ai-video.webp",
             text:"A video project developed using AI tools for visual generation, editing, or storytelling."},
@@ -688,7 +694,7 @@ function cardHTML(p){
   const c = CARDS[p.key];
   return `<a class="pcard reveal" href="#${p.key}" aria-label="View project ${p.n}: ${esc(c.title)}">
     <span class="spot" aria-hidden="true"></span>
-    <div class="thumb"><img src="${c.thumb}" alt="${esc(c.title)} thumbnail" loading="lazy" width="960" height="597"><span class="num">${p.n}</span></div>
+    <div class="thumb"><img src="${c.thumb}" alt="${esc(c.title)} thumbnail" loading="lazy" width="960" height="597"${c.pos ? ` style="object-position:${c.pos}"` : ""}><span class="num">${p.n}</span></div>
     <div class="pbody"><p class="cat tone-${c.tone}">${esc(c.label)}</p><h3>${esc(c.title)}</h3><p>${esc(c.text)}</p>
       <span class="go">View Project<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></div></a>`;
 }
@@ -803,7 +809,23 @@ function songPage(p){
    Add the finished pages here, in reading order (page 1 = front cover):
      FLIPBOOK.pages = [{src:"assets/flipbook/page-01.webp", alt:"Cover: …"}, {src:"assets/flipbook/page-02.webp", alt:"…"}, …]
    Open the page with ?flipdemo=1 to preview the viewer with clearly labelled sample pages. */
-const FLIPBOOK = { pages: [], pdf: "" };
+const FLIPBOOK = {
+  pdf: "assets/flipbook/Dari-Kain-Putih-ke-Pelangi.pdf",
+  pages: [
+    "Cover: Dari Kain Putih ke Pelangi, a tie-dye cloth tied with marbles",
+    "Page 2: What is batik? A batik artist at work and the wax, tie and dye steps",
+    "Page 3: From Terengganu and Kelantan, with batik photos and the pioneers of Batik Pelangi",
+    "Page 4: Basic principles of batik, with a canting wax photo",
+    "Page 5: What makes batik beautiful? Five principles of visual language",
+    "Page 6: Parts of a batik cloth, a labelled diagram of a sarung",
+    "Page 7: Four types of batik motif: flora, fauna, geometric and abstract",
+    "Page 8: Four types of batik: Pelangi, Canting, Block and Screen",
+    "Page 9: Tools and materials for Batik Pelangi, numbered illustration",
+    "Page 10: Batik Pelangi steps 1 to 4",
+    "Page 11: Batik Pelangi steps 5 to 8 and the finished cloth",
+    "Page 12: Summary, self-test, sources and credits"
+  ].map((alt,i)=>({ src:`assets/flipbook/page-${String(i+1).padStart(2,"0")}.webp`, alt }))
+};
 
 function flipDemoOn(){ return new URLSearchParams(location.search).get("flipdemo") === "1"; }
 function flipPages(){
@@ -814,7 +836,8 @@ function flipPages(){
 function fbFaceHTML(pg, i){
   if(!pg) return `<div class="fb-blank"></div>`;
   if(pg.sample) return `<div class="fb-sample" role="img" aria-label="${esc(pg.alt)}"><b>${pg.n}</b><span>Sample page</span></div>`;
-  return `<img src="${esc(pg.src)}" alt="${esc(pg.alt || `Page ${i+1}`)}" ${i<4 ? "" : 'loading="lazy"'} decoding="async" draggable="false">`;
+  // no loading="lazy": faces on rotated 3D leaves are never "near the viewport" for the lazy loader, so they would stay blank
+  return `<img src="${esc(pg.src)}" alt="${esc(pg.alt || `Page ${i+1}`)}" decoding="async" draggable="false">`;
 }
 function flipbookHTML(pages){
   const demo = !!pages[0]?.sample;
@@ -1040,7 +1063,7 @@ function genericPage(p){
     : `<div class="mediabox"><div><span class="badge wip">Work in progress</span><b>${esc(p.media.label)}</b><span>${esc(p.media.hint)}</span></div></div>`;
   return `
   <div class="phero reveal">
-    <div class="meta"><span class="eyebrow">${p.n} — ${esc(p.cat)}</span><span class="badge wip">Work in progress</span></div>
+    <div class="meta"><span class="eyebrow">${p.n} — ${esc(p.cat)}</span>${p.status==="done" ? `<span class="badge done">Completed</span>` : `<span class="badge wip">Work in progress</span>`}</div>
     <h1>${esc(p.title)}</h1>
   </div>
   ${fbPages.length ? `<div class="reveal" style="margin-bottom:26px">${media}</div>` : ""}
@@ -1054,7 +1077,8 @@ function genericPage(p){
     <div class="stack">
       ${panel("Learning Objectives",`<ul class="steps">${p.objectives.map(s=>`<li>${esc(s)}</li>`).join("")}</ul>`,"reveal")}
       ${panel("Tools Used",`<div class="chips" style="margin-top:0">${p.tools.map(t=>`<span class="chip">${esc(t)}</span>`).join("")}</div>`,"reveal")}
-      ${panel("Status",`<p>This project has not been completed yet, so no results are shown. The page is ready to receive its final ${esc(p.media.type)} content.</p>`,"reveal")}
+      ${p.notes ? panel("Sources and Credits", p.notes, "reveal")
+        : panel("Status",`<p>This project has not been completed yet, so no results are shown. The page is ready to receive its final ${esc(p.media.type)} content.</p>`,"reveal")}
     </div>
   </div>`;
 }
