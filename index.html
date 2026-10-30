@@ -339,6 +339,8 @@ input[type=range].rng::-moz-range-thumb{width:16px;height:16px;border:0;border-r
 .fb:fullscreen .fb-book.single{width:min(92vw,calc((100vh - 120px)*5/7))}
 .fb-ctrl .fb-beta{margin-left:6px;padding:1px 7px;border-radius:999px;border:1px solid rgba(250,204,21,.4);color:#fde68a;font:500 .58rem var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
 .fb-ctrl .btn[aria-pressed="true"]{border-color:rgba(56,189,248,.7);background:rgba(56,189,248,.12)}
+.fb-lang{display:inline-flex;gap:6px;padding:3px;border:1px solid rgba(255,255,255,.14);border-radius:999px}
+.fb-lang .btn{padding:7px 14px;border-radius:999px}
 .fb-cam{position:absolute;right:10px;bottom:10px;z-index:30;width:196px;padding:8px;border-radius:16px;cursor:default;
   background:rgba(8,7,19,.82);border:1px solid var(--card-line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .fb-camv{position:relative;width:100%;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:#000}
@@ -645,7 +647,7 @@ const CARDS = {
             text:"A collection of AI-generated visual artworks created through prompt-based design and digital creativity."},
   song:    {label:"Music & Lyrics", title:"AI Song", tone:"sky", thumb:"assets/thumbs/ai-song.webp",
             text:"An AI-assisted music project featuring generated audio, lyrics, and creative sound exploration."},
-  flipbook:{label:"Interactive Storytelling", title:"Digital Flipbook", tone:"pink", thumb:"assets/flipbook/page-01.webp", pos:"50% 66%",
+  flipbook:{label:"Interactive Storytelling", title:"Digital Flipbook", tone:"pink", thumb:"assets/thumbs/flipbook.webp",
             text:"An interactive digital flipbook designed for creative storytelling or educational presentation."},
   video:   {label:"Motion & Story", title:"AI Video", tone:"violet", thumb:"assets/thumbs/ai-video.webp",
             text:"A video project developed using AI tools for visual generation, editing, or storytelling."},
@@ -809,22 +811,42 @@ function songPage(p){
    Add the finished pages here, in reading order (page 1 = front cover):
      FLIPBOOK.pages = [{src:"assets/flipbook/page-01.webp", alt:"Cover: …"}, {src:"assets/flipbook/page-02.webp", alt:"…"}, …]
    Open the page with ?flipdemo=1 to preview the viewer with clearly labelled sample pages. */
+const FLIPBOOK_LANGS = {
+  ms: { label:"BM", name:"Bahasa Melayu", pdf:"assets/flipbook/Dari-Kain-Putih-ke-Pelangi.pdf", prefix:"page-",
+    alts:[
+      "Cover: Dari Kain Putih ke Pelangi, a tie-dye cloth tied with marbles",
+      "Page 2: What is batik? A batik artist at work and the wax, tie and dye steps",
+      "Page 3: From Terengganu and Kelantan, with batik photos and the pioneers of Batik Pelangi",
+      "Page 4: Basic principles of batik, with a canting wax photo",
+      "Page 5: What makes batik beautiful? Five principles of visual language",
+      "Page 6: Parts of a batik cloth, a labelled diagram of a sarung",
+      "Page 7: Four types of batik motif: flora, fauna, geometric and abstract",
+      "Page 8: Four types of batik: Pelangi, Canting, Block and Screen",
+      "Page 9: Tools and materials for Batik Pelangi, numbered illustration",
+      "Page 10: Batik Pelangi steps 1 to 4",
+      "Page 11: Batik Pelangi steps 5 to 8 and the finished cloth",
+      "Page 12: Summary, self-test, sources and credits"
+    ] },
+  en: { label:"English", name:"English", pdf:"assets/flipbook/From-White-Cloth-to-Rainbow.pdf", prefix:"page-en-",
+    alts:[
+      "Cover: From White Cloth to Rainbow, a tie-dye cloth tied with marbles",
+      "Page 2: What is batik? A batik artist at work and the wax, tie and dye steps",
+      "Page 3: From Terengganu and Kelantan, with batik photos and the pioneers of Batik Pelangi",
+      "Page 4: Basic principles of batik, with a canting wax photo",
+      "Page 5: What makes batik beautiful? Five principles of visual language",
+      "Page 6: Parts of a batik cloth, a labelled diagram of a sarong",
+      "Page 7: Four types of batik motif: flora, fauna, geometric and abstract",
+      "Page 8: Four types of batik: Pelangi, Canting, Block and Screen",
+      "Page 9: Tools and materials for Batik Pelangi, numbered illustration",
+      "Page 10: Batik Pelangi steps 1 to 4",
+      "Page 11: Batik Pelangi steps 5 to 8 and the finished cloth",
+      "Page 12: Summary, self-test, sources and credits"
+    ] }
+};
+let fbLang = "ms";
 const FLIPBOOK = {
-  pdf: "assets/flipbook/Dari-Kain-Putih-ke-Pelangi.pdf",
-  pages: [
-    "Cover: Dari Kain Putih ke Pelangi, a tie-dye cloth tied with marbles",
-    "Page 2: What is batik? A batik artist at work and the wax, tie and dye steps",
-    "Page 3: From Terengganu and Kelantan, with batik photos and the pioneers of Batik Pelangi",
-    "Page 4: Basic principles of batik, with a canting wax photo",
-    "Page 5: What makes batik beautiful? Five principles of visual language",
-    "Page 6: Parts of a batik cloth, a labelled diagram of a sarung",
-    "Page 7: Four types of batik motif: flora, fauna, geometric and abstract",
-    "Page 8: Four types of batik: Pelangi, Canting, Block and Screen",
-    "Page 9: Tools and materials for Batik Pelangi, numbered illustration",
-    "Page 10: Batik Pelangi steps 1 to 4",
-    "Page 11: Batik Pelangi steps 5 to 8 and the finished cloth",
-    "Page 12: Summary, self-test, sources and credits"
-  ].map((alt,i)=>({ src:`assets/flipbook/page-${String(i+1).padStart(2,"0")}.webp`, alt }))
+  get pdf(){ return FLIPBOOK_LANGS[fbLang].pdf; },
+  get pages(){ const l = FLIPBOOK_LANGS[fbLang]; return l.alts.map((alt,i)=>({ src:`assets/flipbook/${l.prefix}${String(i+1).padStart(2,"0")}.webp`, alt })); }
 };
 
 function flipDemoOn(){ return new URLSearchParams(location.search).get("flipdemo") === "1"; }
@@ -850,7 +872,8 @@ function flipbookHTML(pages){
       <button class="btn" id="fbNext" type="button" aria-label="Next page">Next &rarr;</button>
       <button class="btn" id="fbFs" type="button" aria-label="Toggle fullscreen">⤢ Fullscreen</button>
       <button class="btn" id="fbHand" type="button" aria-pressed="false" aria-label="Turn pages with hand gestures using your camera (beta)">✋ Hand control <small class="fb-beta">beta</small></button>
-      ${FLIPBOOK.pdf ? `<a class="btn" href="${esc(FLIPBOOK.pdf)}" target="_blank" rel="noopener">PDF</a>` : ""}
+      ${demo ? "" : `<div class="fb-lang" role="group" aria-label="Language">${Object.entries(FLIPBOOK_LANGS).map(([k,l])=>`<button class="btn" type="button" data-lang="${k}" aria-pressed="${k===fbLang}" aria-label="${esc(l.name)}">${esc(l.label)}</button>`).join("")}</div>`}
+      ${FLIPBOOK.pdf ? `<a class="btn" id="fbPdf" href="${esc(FLIPBOOK.pdf)}" target="_blank" rel="noopener">PDF</a>` : ""}
     </div>
     ${demo ? `<p class="note fb-demo" style="text-align:center">Sample layout preview — these are placeholder pages, not project content.</p>` : ""}
   </div>`;
@@ -971,7 +994,7 @@ function cleanupFlipbook(){ if(fbCleanup){ fbCleanup(); fbCleanup = null; } }
 function initFlipbook(pages){
   const root = $("#fb"); if(!root) return;
   const stage = $("#fbStage"), book = $("#fbBook"), status = $("#fbStatus"), prevB = $("#fbPrev"), nextB = $("#fbNext"), fsB = $("#fbFs");
-  const N = pages.length, L = Math.ceil(N/2), mq = matchMedia("(min-width: 720px)");
+  let N = pages.length, L = Math.ceil(N/2); const mq = matchMedia("(min-width: 720px)");
   let spread = mq.matches, cur = 0, leaves = [], moving = -1, sheet = null, busy = false;
 
   function build(){
@@ -1017,6 +1040,16 @@ function initFlipbook(pages){
       if(!reduceMotion.matches && sheet.animate) sheet.animate([{opacity:0, transform:`translateX(${d*28}px)`},{opacity:1, transform:"none"}], {duration:320, easing:"ease-out"});
     }
   }
+  function setLang(k){
+    if(!FLIPBOOK_LANGS[k] || k === fbLang) return;
+    fbLang = k; pages = flipPages(); N = pages.length; L = Math.ceil(N/2);
+    if(cur > (spread ? L : N-1)) cur = spread ? L : N-1;
+    moving = -1; busy = false; build();
+    $$("[data-lang]", root).forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.lang === k)));
+    const a = $("#fbPdf"); if(a) a.href = FLIPBOOK.pdf;
+    root.setAttribute("aria-label", `Digital flipbook, ${FLIPBOOK_LANGS[k].name}, ${N} pages. Use the arrow keys to turn pages.`);
+  }
+  $$("[data-lang]", root).forEach(b=>b.addEventListener("click", ()=>setLang(b.dataset.lang)));
   prevB.addEventListener("click", ()=>turn(-1));
   nextB.addEventListener("click", ()=>turn(1));
 
