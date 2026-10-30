@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Studio Batik Pelangi | EDU456 Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Unbounded:wght@600&display=swap" rel="stylesheet">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<style>
+:root{--bg:#120e22;--panel:rgba(22,17,42,.94);--ink:#f4efff;--mut:#b6a9d6;--line:rgba(255,255,255,.14);--acc:#38bdf8;--ok:#4ade80;--bad:#fb7185;--gold:#facc15}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:400 15px/1.5 Manrope,"Segoe UI",sans-serif;overflow:hidden}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.top{position:fixed;top:0;left:0;right:0;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;pointer-events:none;flex-wrap:wrap}
+.top>*{pointer-events:auto}
+.brand{font:600 15px Unbounded,sans-serif;display:flex;align-items:center;gap:10px}
+.brand a{color:var(--mut);font:600 13px Manrope;text-decoration:none;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+.btn,.chip{font:600 13px Manrope,sans-serif;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer}
+.btn:hover,.chip:hover{border-color:var(--acc)}
+.btn.pri{background:var(--acc);color:#04202e;border-color:var(--acc)}
+.stations{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));overflow-x:auto;justify-content:center;pointer-events:none}
+.stations .chip{pointer-events:auto;white-space:nowrap}
+.chip.done{border-color:var(--ok);color:var(--ok)}
+.chip.on{background:var(--acc);color:#04202e;border-color:var(--acc)}
+.chip.sel{background:rgba(56,189,248,.18);border-color:var(--acc);color:var(--acc)}
+.chip.ok{background:rgba(74,222,128,.15);border-color:var(--ok);color:var(--ok)}
+.chip.bad{background:rgba(251,113,133,.15);border-color:var(--bad);color:var(--bad)}
+#panel{position:fixed;right:14px;top:70px;width:min(420px,calc(100vw - 28px));max-height:calc(100vh - 150px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px;backdrop-filter:blur(8px);display:none}
+#panel h2{margin:0 0 4px;font:600 17px Unbounded,sans-serif}
+#panel .kick{font-size:12px;color:var(--acc);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+#panel p{margin:6px 0;color:var(--mut)}
+.row{padding:8px 0;border-top:1px solid var(--line)}
+.row .q{margin-bottom:6px;font-weight:600}
+.msg{margin-top:10px;font-weight:600;min-height:22px}
+.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+.x{position:absolute;top:10px;right:12px}
+.hint{position:fixed;left:50%;transform:translateX(-50%);bottom:64px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--mut);pointer-events:none}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:6px;vertical-align:-2px}
+.stars{font-size:26px;color:var(--gold);letter-spacing:4px}
+#load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);font:600 16px Unbounded,sans-serif;z-index:5}
+.note{font-size:12px;color:var(--mut)}
+@media (max-width:700px){#panel{left:10px;right:10px;top:auto;bottom:62px;width:auto;max-height:55vh}.hint{display:none}.brand{font-size:13px}}
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Bilik studio batik 3D / 3D batik studio"></canvas>
+<div id="load">Memuatkan studio…</div>
+<div class="top">
+  <div class="brand"><a href="../#projects">← <span data-t="back">Portfolio</span></a><span data-t="title">Studio Batik Pelangi</span></div>
+  <div style="display:flex;gap:8px"><button class="btn" id="bHelp" data-t="help">Bantuan</button><button class="btn" id="bLang">English</button></div>
+</div>
+<div id="panel" role="dialog" aria-live="polite"></div>
+<div class="hint" id="hint" data-t="hint">Seret untuk pusing, klik objek untuk main</div>
+<div class="stations" id="stations"></div>
+
+<script type="module">
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+/* ---------- language ---------- */
+let lang = "ms";
+const T = p => (typeof p === "string" ? p : p[lang === "ms" ? 0 : 1]);
+const UI = {
+  back:["Portfolio","Portfolio"], title:["Studio Batik Pelangi","Batik Pelangi Studio"],
+  help:["Bantuan","Help"], hint:["Seret untuk pusing, klik objek untuk main","Drag to look around, click an object to play"],
+  close:["Tutup","Close"], check:["Semak","Check"], retry:["Cuba lagi","Try again"],
+  helpText:["Selesaikan 5 stesen dalam studio, kemudian jawab soalan di pintu. Klik objek dalam bilik atau butang di bawah. Ada tiga bintang untuk markah terbaik.","Solve the 5 stations in the studio, then answer the questions at the door. Click an object in the room or the buttons below. Three stars is the best score."],
+  allOk:["Betul semua. Stesen siap.","All correct. Station complete."], someBad:["Ada yang belum tepat. Cuba lagi.","Some are not right yet. Try again."]
+};
+const U = k => T(UI[k]);
+
+/* ---------- content ---------- */
+const ST = [
+  {id:"rack", node:"hs_rack", ch:["Pengenalan","Introduction"], name:["Rak kain","Fabric rack"]},
+  {id:"map", node:"hs_map", ch:["Asal-usul","Origins"], name:["Peta asal-usul","Origins map"]},
+  {id:"motif", node:"hs_motif", ch:["Motif","Motifs"], name:["Dinding motif","Motif wall"]},
+  {id:"tools", node:"hs_tools", ch:["Alat dan bahan","Tools and materials"], name:["Kabinet alat","Tool cabinet"]},
+  {id:"table", node:"hs_table", ch:["Proses","Process"], name:["Meja proses","Process table"]},
+  {id:"door", node:"hs_door", ch:["Rumusan","Summary"], name:["Pintu","Door"]}
+];
+const SETS = {
+  rack:{
+    intro:["Tandakan cara setiap batik menghalang warna.","Mark how each batik blocks the dye."],
+    opts:[["w",["Lilin","Wax"]],["t",["Ikatan","Ties"]]],
+    rows:[{q:["Batik canting","Canting batik"],a:"w"},{q:["Batik blok (cap)","Block (cap) batik"],a:"w"},{q:["Batik skrin","Screen batik"],a:"w"},{q:["Batik Pelangi","Batik Pelangi"],a:"t"}]},
+  map:{
+    intro:["Jawab berdasarkan buku teks dan catatan sejarah dalam flipbook.","Answer from the textbook and the historical notes in the flipbook."],
+    rows:[
+      {q:["Dikaitkan dengan penghasilan awal kain pelangi di Terengganu","Associated with early kain pelangi production in Terengganu"],a:"m",opts:[["m",["Minah Pelangi","Minah Pelangi"]],["c",["Haji Che Su","Haji Che Su"]]]},
+      {q:["Menyumbang kepada perusahaan batik dan cetakan blok di Kelantan","Contributed to the batik enterprise and block printing in Kelantan"],a:"c",opts:[["m",["Minah Pelangi","Minah Pelangi"]],["c",["Haji Che Su","Haji Che Su"]]]},
+      {q:["\"Batik ialah satu-satunya pakaian kebangsaan Malaysia.\"","\"Batik is the only national attire of Malaysia.\""],a:"f",opts:[["b",["Benar","True"]],["f",["Palsu","False"]]]}]},
+  motif:{
+    intro:["Padankan setiap motif dengan kategorinya.","Match each motif with its category."],
+    opts:[["fl",["Flora","Flora"]],["fa",["Fauna","Fauna"]],["ge",["Geometri","Geometric"]],["ab",["Abstrak","Abstract"]]],
+    rows:[{q:["Pucuk rebung","Pucuk rebung (bamboo shoot)"],a:"fl"},{q:["Kupu-kupu","Butterfly"],a:"fa"},{q:["Kawung","Kawung"],a:"ge"},{q:["Mega mendung (awan hujan)","Mega mendung (rain clouds)"],a:"ab"}]}
+};
+const TOOLS = [
+  [["Tali atau benang","String or thread"],1],[["Getah","Rubber bands"],1],[["Guli","Marbles"],1],[["Berus","Brush"],1],
+  [["Pewarna Remazol","Remazol dye"],1],[["Sodium silikat","Sodium silicate"],1],[["Sarung tangan","Gloves"],1],[["Cermin mata keselamatan","Safety glasses"],1],
+  [["Lilin cair","Molten wax"],0],[["Canting","Canting tool"],0],[["Blok logam","Metal block"],0]
+];
+const STEPS = [["Ikat kain","Tie the cloth"],["Sediakan pewarna","Prepare the dye"],["Celup kain","Dye the cloth"],["Tambah warna","Add colour"],["Buka ikatan","Untie the cloth"],["Matikan warna (sodium silikat)","Fix the colour (sodium silicate)"],["Cuci","Wash"],["Keringkan di tempat teduh","Dry in a shady place"]];
+const SHUF = [3,6,0,5,2,7,1,4];
+const DYES = [["#e24b4a","Merah","Red"],["#f08c00","Jingga","Orange"],["#fcc419","Kuning","Yellow"],["#2f9e44","Hijau","Green"],["#1c7ed6","Biru","Blue"],["#7048e8","Ungu","Purple"]];
+const QUIZ = [
+  {q:["Apakah fungsi lilin dalam batik?","What does wax do in batik?"],o:[["Menghalang warna daripada meresap","It blocks the dye from soaking in"],["Menambah warna pada kain","It adds colour to the cloth"],["Mengeringkan kain","It dries the cloth"],["Menguatkan benang","It strengthens the thread"]],a:0},
+  {q:["Batik Pelangi dihasilkan dengan teknik apa?","Which technique makes Batik Pelangi?"],o:[["Canting berlilin","Wax canting"],["Ikat celup tanpa lilin","Tie-dye without wax"],["Cap blok logam","Metal block stamping"],["Skrin saring sutera","Silk screen"]],a:1},
+  {q:["Tempoh rendaman sodium silikat sebenar mesti mengikut apa?","What must the real sodium silicate soaking time follow?"],o:[["Agak-agak sahaja","A rough guess"],["Panduan pengilang pewarna dan arahan guru","The dye maker's guidance and the teacher"],["Pendapat kawan","A friend's opinion"],["Lebih lama lebih baik","The longer the better"]],a:1}
+];
+
+/* ---------- state ---------- */
+const S = {done:{}, mistakes:0, cur:null, sel:{}, checked:{}, tools:new Set(), toolsChecked:false, order:[], colors:[], clothMade:false, quiz:0, quizMsg:"", cloth:null, finished:false};
+const $ = s => document.querySelector(s), panel = $("#panel");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- three.js ---------- */
+const canvas = $("#c");
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x2a2140);
+const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 60);
+scene.add(new THREE.HemisphereLight(0xfff4e0, 0x6b5a8e, 1.15));
+const sun = new THREE.DirectionalLight(0xffffff, 1.25); sun.position.set(5, 9, 6); scene.add(sun);
+const lampL = new THREE.PointLight(0xffd9a0, 18, 9); lampL.position.set(0.3, 2.9, -0.3); scene.add(lampL);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.enablePan = false; controls.minDistance = 3; controls.maxDistance = 16;
+controls.minPolarAngle = 0.35; controls.maxPolarAngle = 1.38; controls.minAzimuthAngle = -0.7; controls.maxAzimuthAngle = 1.9;
+const HOME = {pos:new THREE.Vector3(7.2, 6.2, 8.2), tgt:new THREE.Vector3(0, 1.1, -0.8)};
+camera.position.copy(HOME.pos); controls.target.copy(HOME.tgt);
+
+let stationMeshes = {}, doorPivot = null, doorTarget = 0, clothSlot = null, hover = null, tween = null;
+const nodes = {};
+
+function size(){ const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+addEventListener("resize", size); size();
+
+new GLTFLoader().load("../assets/game/studio.glb", g => {
+  scene.add(g.scene);
+  g.scene.traverse(o => { if (o.isMesh) o.material = o.material.clone(); });
+  ST.forEach(s => {
+    const n = g.scene.getObjectByName(s.node); nodes[s.id] = n; stationMeshes[s.id] = [];
+    n.traverse(o => { if (o.isMesh) { o.userData.st = s.id; stationMeshes[s.id].push(o); } });
+  });
+  doorPivot = g.scene.getObjectByName("door_pivot");
+  clothSlot = g.scene.getObjectByName("cloth_slot");
+  if (clothSlot) clothSlot.material.side = THREE.DoubleSide;
+  $("#load").remove();
+  refresh();
+}, undefined, () => { $("#load").textContent = "Gagal memuatkan model 3D / Could not load the 3D model"; });
+
+function worldCenter(id){ const b = new THREE.Box3().setFromObject(nodes[id]); return b.getCenter(new THREE.Vector3()); }
+function flyTo(pos, tgt){ tween = {t0:performance.now(), d:700, p0:camera.position.clone(), g0:controls.target.clone(), p1:pos, g1:tgt}; }
+function focus(id){
+  if (!nodes[id]) return;
+  const c = worldCenter(id); c.y = Math.max(c.y, 1.0);
+  const dir = HOME.pos.clone().sub(c).setY(0).normalize();
+  const far = innerWidth < 700 ? 6.8 : 5.2;
+  flyTo(c.clone().add(dir.multiplyScalar(far)).add(new THREE.Vector3(0, 2.2, 0)), c);
+}
+
+/* picking */
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+function pickAt(e){
+  const r = canvas.getBoundingClientRect(); mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(Object.values(stationMeshes).flat(), false)[0];
+  return hit ? hit.object.userData.st : null;
+}
+function setHover(id){
+  if (id === hover) return;
+  if (hover) stationMeshes[hover].forEach(m => m.material.emissive.setHex(0x000000));
+  hover = id; canvas.style.cursor = id ? "pointer" : "grab";
+  if (id) stationMeshes[id].forEach(m => m.material.emissive.setHex(0x2a3b55));
+}
+canvas.addEventListener("pointermove", e => { if (e.pointerType === "mouse") setHover(pickAt(e)); });
+let down = null;
+canvas.addEventListener("pointerdown", e => { down = {x:e.clientX, y:e.clientY}; });
+canvas.addEventListener("pointerup", e => {
+  if (!down) return; const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y); down = null;
+  if (moved > 6) return; const id = pickAt(e); if (id) openStation(id);
+});
+
+/* cloth texture from the player's three colours */
+function makeCloth(cols){
+  const N = 512, c = document.createElement("canvas"); c.width = c.height = N;
+  const x = c.getContext("2d"), im = x.createImageData(N, N);
+  const rgb = cols.map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)));
+  const sectors = rgb.length * 2;
+  for (let py = 0; py < N; py++) for (let px = 0; px < N; px++){
+    const dx = px - N / 2, dy = py - N / 2, r = Math.hypot(dx, dy) / (N / 2);
+    let a = Math.atan2(dy, dx) / (Math.PI * 2) + 0.5, t = (a + r * 0.9) % 1, seg = t * sectors, i = Math.floor(seg), f = seg - i;
+    const base = rgb[i % rgb.length];
+    let w = f < 0.07 ? (0.07 - f) / 0.07 : f > 0.93 ? (f - 0.93) / 0.07 : 0; w = Math.min(1, w * 0.65 + (r < 0.06 ? 0.7 : 0));
+    const n = (Math.random() - 0.5) * 16, o = (py * N + px) * 4;
+    for (let k = 0; k < 3; k++) im.data[o + k] = Math.max(0, Math.min(255, base[k] * (1 - w) + 250 * w + n));
+    im.data[o + 3] = 255;
+  }
+  x.putImageData(im, 0, 0); S.cloth = c;
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  if (clothSlot){ clothSlot.material.map = tex; clothSlot.material.color.setHex(0xffffff); clothSlot.material.needsUpdate = true; }
+}
+
+/* ---------- UI ---------- */
+function stars(){ return S.mistakes <= 2 ? 3 : S.mistakes <= 6 ? 2 : 1; }
+function refresh(){
+  $("#stations").innerHTML = ST.map((s, i) => `<button class="chip ${S.done[s.id] ? "done" : ""} ${S.cur === s.id ? "on" : ""}" data-a="open" data-id="${s.id}">${i + 1}. ${esc(T(s.name))}${S.done[s.id] ? " ✓" : ""}</button>`).join("");
+  document.querySelectorAll("[data-t]").forEach(e => e.textContent = T(UI[e.dataset.t]));
+  $("#bLang").textContent = lang === "ms" ? "English" : "Bahasa Melayu";
+  document.documentElement.lang = lang === "ms" ? "ms" : "en";
+  if (S.cur) render();
+}
+function openStation(id){
+  if (id === "door" && !ST.slice(0, 5).every(s => S.done[s.id]) && !S.done.door){ S.cur = id; focus(id); panelShow(lockedHTML()); refresh(); return; }
+  S.cur = id; focus(id); render(); refresh();
+}
+function closePanel(){ S.cur = null; panel.style.display = "none"; flyTo(HOME.pos.clone(), HOME.tgt.clone()); refresh(); }
+function panelShow(html){ panel.style.display = "block"; panel.innerHTML = `<button class="btn x" data-a="close">${U("close")}</button>${html}`; }
+function head(id){ const s = ST.find(x => x.id === id); return `<div class="kick">${esc(T(s.ch))}</div><h2>${esc(T(s.name))}</h2>`; }
+function lockedHTML(){
+  const left = ST.slice(0, 5).filter(s => !S.done[s.id]).map(s => T(s.name));
+  return head("door") + `<p>${lang === "ms" ? "Pintu masih terkunci. Siapkan dahulu: " : "The door is still locked. Finish these first: "}${esc(left.join(", "))}.</p>`;
+}
+function render(){
+  const id = S.cur; if (!id) return;
+  if (id === "door") return panelShow(S.done.door ? endHTML() : S.quiz >= 0 && ST.slice(0, 5).every(s => S.done[s.id]) ? quizHTML() : lockedHTML());
+  if (SETS[id]) return panelShow(setHTML(id));
+  if (id === "tools") return panelShow(toolsHTML());
+  if (id === "table") return panelShow(tableHTML());
+}
+function setHTML(id){
+  const set = SETS[id], sel = S.sel[id] || (S.sel[id] = {}), chk = S.checked[id];
+  let h = head(id) + `<p>${esc(T(set.intro))}</p>`;
+  set.rows.forEach((r, i) => {
+    const opts = r.opts || set.opts;
+    h += `<div class="row"><div class="q">${esc(T(r.q))}</div>` + opts.map(([v, lab]) => {
+      let cl = sel[i] === v ? "sel" : ""; if (chk && sel[i] === v) cl = sel[i] === r.a ? "ok" : "bad";
+      return `<button class="chip ${cl}" data-a="pick" data-s="${id}" data-i="${i}" data-v="${v}">${esc(T(lab))}</button> `;
+    }).join("") + `</div>`;
+  });
+  return h + (S.done[id] ? `<div class="msg ok">${U("allOk")}</div>` : `<div class="msg ${chk ? "bad" : ""}">${chk ? U("someBad") : ""}</div><button class="btn pri" data-a="check" data-s="${id}">${U("check")}</button>`);
+}
+function toolsHTML(){
+  let h = head("tools") + `<p>${lang === "ms" ? "Pilih semua alat dan bahan yang diperlukan untuk Batik Pelangi, termasuk perlindungan diri. Jangan pilih yang bukan miliknya." : "Pick every tool and material needed for Batik Pelangi, including protection. Leave out the ones that do not belong."}</p><div class="row">`;
+  TOOLS.forEach(([n, need], i) => {
+    const on = S.tools.has(i); let cl = on ? "sel" : ""; if (S.toolsChecked && on) cl = need ? "ok" : "bad";
+    h += `<button class="chip ${cl}" data-a="tool" data-i="${i}" style="margin:3px 4px 3px 0">${esc(T(n))}</button>`;
+  });
+  h += `</div>`;
+  return h + (S.done.tools ? `<div class="msg ok">${U("allOk")}</div>` : `<div class="msg ${S.toolsChecked ? "bad" : ""}">${S.toolsChecked ? U("someBad") : ""}</div><button class="btn pri" data-a="checkTools">${U("check")}</button>`);
+}
+function tableHTML(){
+  let h = head("table");
+  if (S.done.table) return h + `<div class="msg ok">${lang === "ms" ? "Kain pelangi anda sudah tergantung di tali ampaian." : "Your rainbow cloth is now hanging on the drying line."}</div><p class="note">${lang === "ms" ? "Ini contoh ilustratif teknik ikat celup moden, bukan gambaran sejarah Batik Pelangi tradisional." : "This is an illustrative example of modern tie-dye, not a historical depiction of traditional Batik Pelangi."}</p>`;
+  if (S.order.length < 8){
+    h += `<p>${lang === "ms" ? "Susun 8 langkah mengikut urutan. Langkah ke-" + (S.order.length + 1) + " ialah?" : "Put the 8 steps in order. What is step " + (S.order.length + 1) + "?"}</p>`;
+    SHUF.forEach(s => { const u = S.order.includes(s); h += `<button class="chip ${u ? "ok" : ""}" ${u ? "disabled" : `data-a="step" data-s="${s}"`} style="margin:3px 4px 3px 0">${u ? S.order.indexOf(s) + 1 + ". " : ""}${esc(T(STEPS[s]))}</button>`; });
+    return h + `<div class="msg ${S.stepBad ? "bad" : ""}">${S.stepBad ? (lang === "ms" ? "Salah urutan. Cuba langkah lain." : "Wrong order. Try another step.") : ""}</div>`;
+  }
+  h += `<p>${lang === "ms" ? "Langkah siap. Pilih 3 warna pewarna untuk kain anda, kemudian celup." : "Steps done. Pick 3 dye colours for your cloth, then dip it."}</p><div class="row">`;
+  DYES.forEach((d, i) => { const on = S.colors.includes(i); h += `<button class="chip ${on ? "sel" : ""}" data-a="dye" data-i="${i}" style="margin:3px 4px 3px 0"><span class="sw" style="background:${d[0]}"></span>${esc(lang === "ms" ? d[1] : d[2])}</button>`; });
+  h += `</div><p class="note">${lang === "ms" ? "Keselamatan: kerja di bawah pengawasan guru, pakai sarung tangan dan cermin mata keselamatan, dan di tempat berudara baik." : "Safety: work under teacher supervision, wear gloves and safety glasses, and use a well-ventilated area."}</p>`;
+  return h + `<button class="btn pri" data-a="dip" ${S.colors.length === 3 ? "" : "disabled"}>${lang === "ms" ? "Celup kain" : "Dip the cloth"}</button>`;
+}
+function quizHTML(){
+  const q = QUIZ[S.quiz];
+  return head("door") + `<p>${lang === "ms" ? "Soalan" : "Question"} ${S.quiz + 1} / ${QUIZ.length}</p><div class="row"><div class="q">${esc(T(q.q))}</div>` +
+    q.o.map((o, i) => `<div style="margin:4px 0"><button class="chip ${S.quizPick === i ? "bad" : ""}" data-a="ans" data-i="${i}">${"ABCD"[i]}. ${esc(T(o))}</button></div>`).join("") + `</div><div class="msg ${S.quizPick != null ? "bad" : ""}">${S.quizPick != null ? (lang === "ms" ? "Bukan itu. Cuba lagi." : "Not that one. Try again.") : ""}</div>`;
+}
+function endHTML(){
+  const n = stars();
+  return head("door") + `<div class="stars" aria-label="${n} / 3">${"★".repeat(n)}${"☆".repeat(3 - n)}</div><p>${lang === "ms" ? "Pintu terbuka. Anda menyelesaikan studio dengan " + S.mistakes + " kesilapan." : "The door is open. You finished the studio with " + S.mistakes + " mistake(s)."}</p>` +
+    `<button class="btn pri" data-a="dl">${lang === "ms" ? "Muat turun kain saya" : "Download my cloth"}</button> <button class="btn" data-a="again">${lang === "ms" ? "Main semula" : "Play again"}</button>` +
+    `<p class="note">${lang === "ms" ? "Kandungan berdasarkan Pendidikan Seni Visual Tingkatan 5 KSSM (2020), Tajuk 6: Seni Batik." : "Content based on Pendidikan Seni Visual Tingkatan 5 KSSM (2020), Topic 6: Seni Batik."}</p>`;
+}
+
+const ACT = {
+  open: d => openStation(d.id), close: () => closePanel(),
+  pick: d => { const s = S.sel[d.s] || (S.sel[d.s] = {}); s[d.i] = d.v; S.checked[d.s] = false; render(); },
+  check: d => {
+    const set = SETS[d.s], sel = S.sel[d.s] || {}; let bad = 0;
+    set.rows.forEach((r, i) => { if (sel[i] !== r.a) bad++; });
+    S.checked[d.s] = true; if (bad){ S.mistakes += bad; } else { S.done[d.s] = true; celebrate(d.s); }
+    render(); refresh();
+  },
+  tool: d => { const i = +d.i; S.tools.has(i) ? S.tools.delete(i) : S.tools.add(i); S.toolsChecked = false; render(); },
+  checkTools: () => {
+    let bad = 0; TOOLS.forEach(([, need], i) => { if (!!need !== S.tools.has(i)) bad++; });
+    S.toolsChecked = true; if (bad) S.mistakes += bad; else { S.done.tools = true; celebrate("tools"); }
+    render(); refresh();
+  },
+  step: d => { const s = +d.s; if (s === S.order.length){ S.order.push(s); S.stepBad = false; } else { S.stepBad = true; S.mistakes++; } render(); },
+  dye: d => { const i = +d.i, k = S.colors.indexOf(i); if (k > -1) S.colors.splice(k, 1); else if (S.colors.length < 3) S.colors.push(i); render(); },
+  dip: () => { makeCloth(S.colors.map(i => DYES[i][0])); S.done.table = true; render(); refresh(); celebrate("table"); },
+  ans: d => {
+    if (+d.i === QUIZ[S.quiz].a){ S.quizPick = null; S.quiz++; if (S.quiz >= QUIZ.length){ S.done.door = true; doorTarget = -1.7; } }
+    else { S.quizPick = +d.i; S.mistakes++; }
+    render(); refresh();
+  },
+  dl: () => {
+    const c = document.createElement("canvas"); c.width = 640; c.height = 760; const x = c.getContext("2d");
+    x.fillStyle = "#faf6ee"; x.fillRect(0, 0, 640, 760);
+    if (S.cloth) x.drawImage(S.cloth, 40, 40, 560, 560);
+    x.fillStyle = "#2b1b3d"; x.font = "600 30px Manrope,sans-serif"; x.fillText(lang === "ms" ? "Kain Pelangi Saya" : "My Rainbow Cloth", 40, 650);
+    x.font = "400 18px Manrope,sans-serif"; x.fillStyle = "#6b5a80"; x.fillText("Studio Batik Pelangi · EDU456 · Lokman Hakim bin Yusoff", 40, 690);
+    x.fillStyle = "#facc15"; x.font = "30px sans-serif"; x.fillText("★".repeat(stars()) + "☆".repeat(3 - stars()), 40, 730);
+    const a = document.createElement("a"); a.download = "kain-pelangi-saya.png"; a.href = c.toDataURL("image/png"); a.click();
+  },
+  again: () => { location.reload(); }
+};
+function celebrate(id){ stationMeshes[id]?.forEach(m => m.material.color.offsetHSL(0, 0.08, 0.06)); }
+document.addEventListener("click", e => { const b = e.target.closest("[data-a]"); if (b && ACT[b.dataset.a]) ACT[b.dataset.a](b.dataset); });
+$("#bLang").addEventListener("click", () => { lang = lang === "ms" ? "en" : "ms"; refresh(); });
+$("#bHelp").addEventListener("click", () => { S.cur = null; panelShow(`<h2>${U("help")}</h2><p>${U("helpText")}</p>`); });
+
+/* loop */
+function tick(){
+  if (tween){ const k = Math.min(1, (performance.now() - tween.t0) / tween.d), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.g0, tween.g1, e); if (k >= 1) tween = null; }
+  if (doorPivot) doorPivot.rotation.y += (doorTarget - doorPivot.rotation.y) * 0.06;
+  controls.update(); renderer.render(scene, camera); requestAnimationFrame(tick);
+}
+refresh(); tick();
+window.__game = {S, ACT, openStation};
+</script>
+</body>
+</html>

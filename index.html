@@ -594,9 +594,15 @@ const PROJECTS = [
    short:"A video project developed using AI tools for visual generation, editing or storytelling.", art:"play",
    overview:"This page will present a video project created with AI tools. The theme, story and tools have not been confirmed yet.",
    media:{type:"Video", label:"Video player", hint:"A video file or link will be embedded here once it is provided."}}),
-  GENERIC({key:"game", n:"05", cat:"English Learning Game", title:"English Learning Game", cardTitle:"English Learning Game",
-   short:"An interactive English learning game supporting vocabulary, grammar or language practice.", art:"game",
-   overview:"This page will present an interactive English learning game. The game type, target learners and topic have not been confirmed yet.",
+  GENERIC({key:"game", n:"05", cat:"Educational Game", title:"Studio Batik Pelangi: A 3D Escape-Room Game", cardTitle:"Studio Batik Pelangi",
+   short:"A 3D escape-room game that teaches Malaysian batik through puzzles, in Bahasa Melayu and English.", art:"game", status:"done",
+   embed:{src:"game/index.html", label:"Play the game"},
+   overview:"Studio Batik Pelangi is a small 3D studio built in Blender and played in the browser. Learners explore the room and solve one puzzle at each station: wax or ties, the origins of Batik Pelangi, motif categories, tools and chemical safety, and the eight tie-dye steps. They then dye their own cloth, answer three questions at the door, and download the cloth they made. The game can be switched between Bahasa Melayu and English and is based on Tajuk 6 (Seni Batik) of the Form 5 KSSM Visual Arts Education textbook.",
+   objectives:["Tell wax-resist batik apart from tie-dye Batik Pelangi.","Match the figures Minah Pelangi and Haji Che Su with their roles, and understand that batik is not the only national attire.","Classify batik motifs as flora, fauna, geometric or abstract.","Choose the right tools and the safety equipment: gloves, safety glasses and good ventilation under teacher supervision.","Put the eight steps of Batik Pelangi in order."],
+   tools:["Blender (3D studio model)","Three.js (browser 3D)","Claude (game design and code)","Notion (planning)"],
+   process:["Reused the Seni Batik content and fact-checked notes from the flipbook so both projects agree.","Designed six stations, one per chapter, with a different puzzle at each instead of plain multiple choice.","Built the studio room in Blender with a Python script and exported it as a small GLB file.","Coded the game with Three.js: orbit camera, clickable stations, puzzles, stars and a downloadable cloth.","Added a Bahasa Melayu and English switch and tested the game on desktop and phone."],
+   reflection:"The student's own reflection will be added here.",
+   notes:`<p>Content is based on Kementerian Pendidikan Malaysia (2020). <i>Pendidikan Seni Visual Tingkatan 5 KSSM</i> (Tajuk 6: Seni Batik, pp. 137–154). Pustaka Sarjana Sdn. Bhd. Textbook statements are kept separate from broader historical notes.</p><p>The cloth pattern is generated in the browser from the colours the player picks. It is an illustrative modern tie-dye example, not a depiction of traditional Batik Pelangi.</p>`,
    media:{type:"Game", label:"Game embed", hint:"The playable game or its link will be embedded here once it is provided."}}),
   GENERIC({key:"mooc", n:"06", cat:"MOOC", title:"Massive Open Online Course (MOOC)", cardTitle:"Massive Open Online Course (MOOC)",
    short:"A MOOC-style learning experience with educational content, outcomes and digital resources.", art:"course",
@@ -651,8 +657,8 @@ const CARDS = {
             text:"An interactive digital flipbook designed for creative storytelling or educational presentation."},
   video:   {label:"Motion & Story", title:"AI Video", tone:"violet", thumb:"assets/thumbs/ai-video.webp",
             text:"A video project developed using AI tools for visual generation, editing, or storytelling."},
-  game:    {label:"Game-Based Learning", title:"English Learning Game", tone:"sky", thumb:"assets/thumbs/english-game.webp",
-            text:"An interactive English learning game designed to support vocabulary, grammar, or language practice."},
+  game:    {label:"Game-Based Learning", title:"Studio Batik Pelangi", tone:"sky", thumb:"assets/thumbs/english-game.webp",
+            text:"A 3D escape-room game that teaches Malaysian batik through puzzles, in Bahasa Melayu and English."},
   mooc:    {label:"Online Course", title:"Massive Open Online Course (MOOC)", tone:"pink", thumb:"assets/thumbs/mooc.webp",
             text:"A section presenting a MOOC-style learning experience with educational content, learning outcomes, and digital resources."}
 };
@@ -1093,6 +1099,7 @@ function initFlipbook(pages){
 function genericPage(p){
   const fbPages = p.key==="flipbook" ? flipPages() : [];
   const media = fbPages.length ? flipbookHTML(fbPages)
+    : p.embed ? `<div style="position:relative;aspect-ratio:16/10;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line,rgba(255,255,255,.14))"><iframe src="${esc(p.embed.src)}" title="${esc(p.title)}" loading="lazy" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div><p style="margin:10px 0 0"><a class="btn" href="${esc(p.embed.src)}" target="_blank" rel="noopener">${esc(p.embed.label)} full screen</a></p>`
     : `<div class="mediabox"><div><span class="badge wip">Work in progress</span><b>${esc(p.media.label)}</b><span>${esc(p.media.hint)}</span></div></div>`;
   return `
   <div class="phero reveal">
