@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ms">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CHROMIX</title>
+    <script type="module" crossorigin src="./assets/index-7jBwHcfF.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DXVLLzmX.css">
+  </head>
+  <body>
+    <video id="cam" playsinline muted></video>
+    <!-- Display-only dimming. MediaPipe reads the video element's frames, which CSS never changes. -->
+    <div id="vignette"></div>
+    <canvas id="stage"></canvas>
+    <aside id="panel" class="hidden"></aside>
+    <!-- Start screen. Every label is filled from the locale files by main.ts (data-i18n). -->
+    <div id="splash">
+      <h1>CHROMIX</h1>
+      <p data-i18n="start.tagline"></p>
+      <form id="settings" class="settings">
+        <p class="note" data-i18n="start.adultNote"></p>
+        <fieldset class="choice">
+          <legend data-i18n="start.age"></legend>
+          <label><input type="radio" name="profile" value="junior" /><span data-i18n="start.junior"></span></label>
+          <label><input type="radio" name="profile" value="senior" /><span data-i18n="start.senior"></span></label>
+        </fieldset>
+        <fieldset class="choice">
+          <legend data-i18n="start.language"></legend>
+          <label><input type="radio" name="lang" value="ms" /><span>Bahasa Melayu</span></label>
+          <label><input type="radio" name="lang" value="en" /><span>English</span></label>
+        </fieldset>
+        <div class="voice">
+          <label><input type="checkbox" id="tutorial-on" /><span data-i18n="start.tutorial"></span></label>
+          <label><input type="checkbox" id="voice-on" /><span data-i18n="start.voice"></span></label>
+          <label class="volume"><span data-i18n="start.volume"></span><input type="range" id="voice-volume" min="0" max="1" step="0.05" /></label>
+        </div>
+      </form>
+      <p class="note tip" data-i18n="start.lightTip"></p>
+      <button id="start" data-i18n="start.button"></button>
+      <p id="splash-msg" role="status"></p>
+    </div>
+  </body>
+</html>
