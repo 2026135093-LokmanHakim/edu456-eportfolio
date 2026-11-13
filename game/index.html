@@ -125,10 +125,16 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":
 const canvas = $("#c");
 const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x2a2140);
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 80);
-scene.add(new THREE.HemisphereLight(0xfff4e0, 0x6b5a8e, 1.2));
-const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(6, 10, 8); scene.add(sun);
+scene.fog = new THREE.Fog(0x2a2140, 26, 70);
+const hemi = new THREE.HemisphereLight(0xfff4e0, 0x6b5a8e, 1.2); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(6, 10, 8); scene.add(sun); scene.add(sun.target);
+sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.03;
+Object.assign(sun.shadow.camera, {left:-9, right:9, top:9, bottom:-9, near:1, far:40});
+const spot = new THREE.SpotLight(0xfff0d0, 0, 14, 0.55, 0.6, 1); scene.add(spot); scene.add(spot.target);
+let focusCam = null;
 const SXS = {rack:5.5, map:11.5, motif:17.5, tools:23.5, table:29.5, door:34.6}, GATES = [8.5, 14.5, 20.5, 26.5, 32.5];
 const H = {obj:null, x:1.5, z:0.8, face:0.3, phase:0, parts:{}};
 const gates = [], nodes = {}, stationMeshes = {};
@@ -136,6 +142,19 @@ let doorPivot = null, doorTarget = 0, clothSlot = null, goal = null, near = null
 const camPos = new THREE.Vector3(-3, 6, 9), camLook = new THREE.Vector3(4, 1, 0);
 function size(){ const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 addEventListener("resize", size); size();
+
+/* framed posters from the flipbook art, hung on the back wall between stations */
+const POSTERS = [[2.6, "poster-start"], [8.5, "poster-types"], [14.5, "poster-motif"], [20.5, "poster-tools"], [26.5, "poster-steps1"], [32.5, "poster-steps2"]];
+function addPosters(){
+  const tl = new THREE.TextureLoader();
+  POSTERS.forEach(([x, name]) => {
+    const g = new THREE.Group(), w = 1.42, h = 2.0;
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(w + 0.16, h + 0.16, 0.06), new THREE.MeshStandardMaterial({color:0x6b4f2e, roughness:0.8}));
+    const tex = tl.load("../assets/game/art/" + name + ".webp"); tex.colorSpace = THREE.SRGBColorSpace;
+    const pic = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({map:tex, roughness:0.9}));
+    pic.position.z = 0.035; frame.castShadow = true; g.add(frame, pic); g.position.set(x, 1.65, -2.86); scene.add(g);
+  });
+}
 
 /* hero: Quaternius Universal Base Characters + Universal Animation Library (CC0), dressed in vertex colours */
 const CLOTH = {shirt:0x1d9e75, sleeve:0xd4537e, pants:0x2b3a67, shoes:0xf4efff};
@@ -164,7 +183,7 @@ function loadHero(){
     const body = []; c.scene.traverse(o => { if (o.isSkinnedMesh) body.push(o); });
     body.sort((p, q) => q.geometry.attributes.position.count - p.geometry.attributes.position.count);
     if (body[0]) dressHero(body[0]);
-    c.scene.traverse(o => { if (o.isMesh){ o.frustumCulled = false; } });
+    c.scene.traverse(o => { if (o.isMesh){ o.frustumCulled = false; o.castShadow = true; } });
     const grp = new THREE.Group(); grp.add(c.scene); scene.add(grp);
     if (H.obj) H.obj.visible = false;
     H.obj = grp; H.mixer = new THREE.AnimationMixer(c.scene); H.acts = {};
@@ -178,7 +197,8 @@ H.play = (name, fade = 0.2) => {
   const nx = H.acts[name], pv = H.acts[H.cur]; nx.reset().fadeIn(fade).play(); if (pv) pv.fadeOut(fade); H.cur = name;
 };
 new GLTFLoader().load("../assets/game/corridor.glb", g => {
-  scene.add(g.scene); loadHero();
+  scene.add(g.scene); loadHero(); addPosters();
+  g.scene.traverse(o => { if (o.isMesh){ o.castShadow = true; o.receiveShadow = true; } });
   ST.forEach(s => {
     const n = g.scene.getObjectByName(s.node); nodes[s.id] = n; stationMeshes[s.id] = [];
     n.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.userData.st = s.id; stationMeshes[s.id].push(o); } });
@@ -213,7 +233,8 @@ function walkTo(id){
 /* picking: tap a station to walk to it, tap the floor to walk there */
 const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), floor = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 let down = null;
-canvas.addEventListener("pointerdown", e => { down = {x:e.clientX, y:e.clientY}; });
+canvas.addEventListener("pointerdown", e => { down = {x:e.clientX, y:e.clientY}; window.focus(); });
+addEventListener("load", () => window.focus());
 canvas.addEventListener("pointerup", e => {
   if (!down) return; const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y); down = null;
   if (moved > 8 || S.cur) return;
@@ -265,8 +286,15 @@ function refresh(){
   if (S.cur) render();
 }
 function openStation(id){
-  if (id === "door" && !ST.slice(0, 5).every(s => S.done[s.id]) && !S.done.door){ S.cur = id; panelShow(lockedHTML()); refresh(); return; }
-  S.cur = id; goal = null; H.busy = performance.now() + 1500; H.play("Interact", 0.15); render(); refresh();
+  if (id === "door" && !ST.slice(0, 5).every(s => S.done[s.id]) && !S.done.door){ S.cur = id; setFocus(id); panelShow(lockedHTML()); refresh(); return; }
+  S.cur = id; goal = null; H.busy = performance.now() + 1500; H.play("Interact", 0.15); setFocus(id); render(); refresh();
+}
+function setFocus(id){
+  const n = nodes[id]; if (!n) return;
+  const c = new THREE.Box3().setFromObject(n).getCenter(new THREE.Vector3()), por = camera.aspect < 0.85;
+  if (id === "door") focusCam = {pos:new THREE.Vector3(c.x - 4.6, 1.9, 1.2), look:new THREE.Vector3(c.x, 1.3, -0.1)};
+  else focusCam = {pos:new THREE.Vector3(c.x - (por ? 0 : 0.3), Math.max(1.7, c.y + 0.5), c.z + (por ? 5.6 : 4.2)), look:new THREE.Vector3(c.x + (por ? 0 : 1.3), Math.max(0.7, c.y * 0.9 - (por ? 0.9 : 0)), c.z)};
+  spot.position.set(c.x, 3.2, c.z + 3); spot.target.position.copy(c);
 }
 function closePanel(){ S.cur = null; panel.style.display = "none"; refresh(); }
 function panelShow(html){ panel.style.display = "block"; panel.innerHTML = `<button class="btn x" data-a="close">${U("close")}</button>${html}`; }
@@ -402,7 +430,10 @@ function tick(now){
   if (doorPivot) doorPivot.rotation.y += (doorTarget - doorPivot.rotation.y) * 0.06;
   const zoom = camera.aspect < 0.85 ? 1.45 : 1;
   const tp = new THREE.Vector3(H.x + (camera.aspect < 0.85 ? 0.4 : 2.4), 1.0, 0.2), cp = new THREE.Vector3(H.x - 3.2 * zoom, 5.6 * zoom, 8.6 * zoom);
-  camPos.lerp(cp, Math.min(1, dt * 4)); camLook.lerp(tp, Math.min(1, dt * 4));
+  const zoomIn = S.cur && focusCam;
+  camPos.lerp(zoomIn ? focusCam.pos : cp, Math.min(1, dt * (zoomIn ? 3 : 4))); camLook.lerp(zoomIn ? focusCam.look : tp, Math.min(1, dt * (zoomIn ? 3 : 4)));
+  spot.intensity += ((zoomIn ? 14 : 0) - spot.intensity) * Math.min(1, dt * 4); hemi.intensity += ((zoomIn ? 0.8 : 1.2) - hemi.intensity) * Math.min(1, dt * 4);
+  sun.position.set(H.x + 6, 10, 8); sun.target.position.set(H.x, 0, 0);
   camera.position.copy(camPos); camera.lookAt(camLook);
   renderer.render(scene, camera); requestAnimationFrame(tick);
 }
