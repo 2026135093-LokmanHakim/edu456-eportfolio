@@ -40,11 +40,11 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:400 15
 .stars{font-size:26px;color:var(--gold);letter-spacing:4px}
 #load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);font:600 16px Unbounded,sans-serif;z-index:5}
 .note{font-size:12px;color:var(--mut)}
-#prompt{position:fixed;left:50%;transform:translateX(-50%);bottom:64px;display:none;font-size:15px;padding:11px 20px;box-shadow:0 6px 24px rgba(0,0,0,.45)}
+#prompt{white-space:nowrap;position:fixed;left:50%;transform:translateX(-50%);bottom:64px;display:none;font-size:15px;padding:11px 20px;box-shadow:0 6px 24px rgba(0,0,0,.45)}
 #joy{position:fixed;left:18px;bottom:78px;width:104px;height:104px;border-radius:50%;border:1px solid var(--line);background:rgba(22,17,42,.55);display:none;touch-action:none}
 #joy i{position:absolute;left:34px;top:34px;width:36px;height:36px;border-radius:50%;background:var(--acc);opacity:.85}
 @media (pointer:coarse){#joy{display:block}}
-@media (max-width:700px){#panel{left:10px;right:10px;top:auto;bottom:62px;width:auto;max-height:55vh}.hint{display:none}.brand{font-size:13px}}
+@media (max-width:700px){#panel{left:10px;right:10px;top:auto;bottom:62px;width:auto;max-height:55vh}.hint{bottom:124px;width:84vw;text-align:center;border-radius:14px}.brand{font-size:13px}}
 </style>
 </head>
 <body>
@@ -137,8 +137,48 @@ const camPos = new THREE.Vector3(-3, 6, 9), camLook = new THREE.Vector3(4, 1, 0)
 function size(){ const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 addEventListener("resize", size); size();
 
+/* hero: Quaternius Universal Base Characters + Universal Animation Library (CC0), dressed in vertex colours */
+const CLOTH = {shirt:0x1d9e75, sleeve:0xd4537e, pants:0x2b3a67, shoes:0xf4efff};
+function dressHero(mesh){
+  const geo = mesh.geometry, si = geo.attributes.skinIndex, sw = geo.attributes.skinWeight, bones = mesh.skeleton.bones, n = si.count, arr = new Float32Array(n * 4);
+  const cls = bones.map(b => { const k = b.name.toLowerCase();
+    if (/upperarm/.test(k)) return "sleeve"; if (/spine|clavicle/.test(k)) return "shirt";
+    if (/pelvis|thigh|calf/.test(k)) return "pants"; if (/foot|ball/.test(k)) return "shoes"; return null; });
+  const col = {}; for (const k in CLOTH) col[k] = new THREE.Color(CLOTH[k]);
+  for (let v = 0; v < n; v++){
+    const w = {shirt:0, sleeve:0, pants:0, shoes:0}; let tot = 0;
+    for (let j = 0; j < 4; j++){ const c = cls[[si.getX(v), si.getY(v), si.getZ(v), si.getW(v)][j]], wt = [sw.getX(v), sw.getY(v), sw.getZ(v), sw.getW(v)][j]; if (c){ w[c] += wt; tot += wt; } }
+    let r = 0, g = 0, b = 0; if (tot > 0) for (const k in w){ r += col[k].r * w[k] / tot; g += col[k].g * w[k] / tot; b += col[k].b * w[k] / tot; }
+    arr.set([r, g, b, Math.min(1, Math.max(0, (tot - 0.4) * 3))], v * 4);
+  }
+  geo.setAttribute("clothC", new THREE.BufferAttribute(arr, 4));
+  const m = mesh.material = mesh.material.clone();
+  m.onBeforeCompile = sh => {
+    sh.vertexShader = "attribute vec4 clothC; varying vec4 vCloth;\n" + sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\nvCloth = clothC;");
+    sh.fragmentShader = "varying vec4 vCloth;\n" + sh.fragmentShader.replace("#include <map_fragment>", "#include <map_fragment>\ndiffuseColor.rgb = mix(diffuseColor.rgb, vCloth.rgb, vCloth.a);");
+  };
+}
+function loadHero(){
+  const L = new GLTFLoader();
+  Promise.all([L.loadAsync("../assets/game/hero.glb"), L.loadAsync("../assets/game/hero-anims.glb")]).then(([c, a]) => {
+    const body = []; c.scene.traverse(o => { if (o.isSkinnedMesh) body.push(o); });
+    body.sort((p, q) => q.geometry.attributes.position.count - p.geometry.attributes.position.count);
+    if (body[0]) dressHero(body[0]);
+    c.scene.traverse(o => { if (o.isMesh){ o.frustumCulled = false; } });
+    const grp = new THREE.Group(); grp.add(c.scene); scene.add(grp);
+    if (H.obj) H.obj.visible = false;
+    H.obj = grp; H.mixer = new THREE.AnimationMixer(c.scene); H.acts = {};
+    a.animations.forEach(cl => { H.acts[cl.name] = H.mixer.clipAction(cl); });
+    H.acts.Interact.setLoop(THREE.LoopOnce); H.acts.Interact.clampWhenFinished = false;
+    H.cur = "Idle_Loop"; H.acts.Idle_Loop.play();
+  }).catch(e => console.error("hero load failed", e));
+}
+H.play = (name, fade = 0.2) => {
+  if (!H.acts || H.cur === name || !H.acts[name]) return;
+  const nx = H.acts[name], pv = H.acts[H.cur]; nx.reset().fadeIn(fade).play(); if (pv) pv.fadeOut(fade); H.cur = name;
+};
 new GLTFLoader().load("../assets/game/corridor.glb", g => {
-  scene.add(g.scene);
+  scene.add(g.scene); loadHero();
   ST.forEach(s => {
     const n = g.scene.getObjectByName(s.node); nodes[s.id] = n; stationMeshes[s.id] = [];
     n.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.userData.st = s.id; stationMeshes[s.id].push(o); } });
@@ -226,7 +266,7 @@ function refresh(){
 }
 function openStation(id){
   if (id === "door" && !ST.slice(0, 5).every(s => S.done[s.id]) && !S.done.door){ S.cur = id; panelShow(lockedHTML()); refresh(); return; }
-  S.cur = id; goal = null; render(); refresh();
+  S.cur = id; goal = null; H.busy = performance.now() + 1500; H.play("Interact", 0.15); render(); refresh();
 }
 function closePanel(){ S.cur = null; panel.style.display = "none"; refresh(); }
 function panelShow(html){ panel.style.display = "block"; panel.innerHTML = `<button class="btn x" data-a="close">${U("close")}</button>${html}`; }
@@ -285,7 +325,7 @@ function endHTML(){
   const n = stars();
   return head("door") + `<div class="stars" aria-label="${n} / 3">${"★".repeat(n)}${"☆".repeat(3 - n)}</div><p>${lang === "ms" ? "Pintu terbuka. Anda menyelesaikan studio dengan " + S.mistakes + " kesilapan." : "The door is open. You finished the studio with " + S.mistakes + " mistake(s)."}</p>` +
     `<button class="btn pri" data-a="dl">${lang === "ms" ? "Muat turun kain saya" : "Download my cloth"}</button> <button class="btn" data-a="again">${lang === "ms" ? "Main semula" : "Play again"}</button>` +
-    `<p class="note">${lang === "ms" ? "Kandungan berdasarkan Pendidikan Seni Visual Tingkatan 5 KSSM (2020), Tajuk 6: Seni Batik." : "Content based on Pendidikan Seni Visual Tingkatan 5 KSSM (2020), Topic 6: Seni Batik."}</p>`;
+    `<p class="note">${lang === "ms" ? "Kandungan berdasarkan Pendidikan Seni Visual Tingkatan 5 KSSM (2020), Tajuk 6: Seni Batik. Watak dan animasi: Quaternius (CC0)." : "Content based on Pendidikan Seni Visual Tingkatan 5 KSSM (2020), Topic 6: Seni Batik. Character and animations: Quaternius (CC0)."}</p>`;
 }
 
 const ACT = {
@@ -342,14 +382,15 @@ function tick(now){
         if (d < 0.12){ const st = goal.station; goal = null; if (st) openStation(st); } else { mx = dx / d; mz = dz / d; }
       }
     }
-    const sp = 3.6, nx = Math.max(0.8, Math.min(limitX(), H.x + mx * sp * dt)), nz = Math.max(-1.4, Math.min(2.3, H.z + mz * sp * dt));
+    const sp = 2.8, nx = Math.max(0.8, Math.min(limitX(), H.x + mx * sp * dt)), nz = Math.max(-1.4, Math.min(2.3, H.z + mz * sp * dt));
     const moved = Math.hypot(nx - H.x, nz - H.z) > 1e-4;
     if (goal && (mx || mz) && !moved) goal = null;
     H.x = nx; H.z = nz;
     if (moved){ const tf = Math.atan2(mx, mz); let df = tf - H.face; df = Math.atan2(Math.sin(df), Math.cos(df)); H.face += df * Math.min(1, dt * 12); H.phase += dt * 10; }
     else H.phase *= 0.8;
     const sw = moved ? Math.sin(H.phase) : H.phase * 0;
-    H.obj.position.set(H.x, moved ? Math.abs(Math.sin(H.phase)) * 0.04 : 0, H.z); H.obj.rotation.y = H.face;
+    H.obj.position.set(H.x, moved && !H.mixer ? Math.abs(Math.sin(H.phase)) * 0.04 : 0, H.z); H.obj.rotation.y = H.face;
+    if (H.mixer){ if (H.acts.Walk_Loop) H.acts.Walk_Loop.timeScale = 1.35; H.play(moved ? "Walk_Loop" : (now < H.busy ? H.cur : (S.done.door ? "Dance_Loop" : "Idle_Loop"))); H.mixer.update(dt); }
     const P = H.parts;
     if (P.legL){ P.legL.rotation.x = sw * 0.7; P.legR.rotation.x = -sw * 0.7; P.armL.rotation.x = -sw * 0.6; P.armR.rotation.x = sw * 0.6; }
     let n = null; for (const s of ST) if (Math.abs(H.x - SXS[s.id]) < 2.0) n = s.id;
@@ -360,7 +401,7 @@ function tick(now){
   gates.forEach((g, i) => { if (g){ const t = S.done[ST[i].id] ? -1.5 : 0; g.position.y += (t - g.position.y) * 0.08; } });
   if (doorPivot) doorPivot.rotation.y += (doorTarget - doorPivot.rotation.y) * 0.06;
   const zoom = camera.aspect < 0.85 ? 1.45 : 1;
-  const tp = new THREE.Vector3(H.x + 2.4, 1.0, 0.2), cp = new THREE.Vector3(H.x - 3.2 * zoom, 5.6 * zoom, 8.6 * zoom);
+  const tp = new THREE.Vector3(H.x + (camera.aspect < 0.85 ? 0.4 : 2.4), 1.0, 0.2), cp = new THREE.Vector3(H.x - 3.2 * zoom, 5.6 * zoom, 8.6 * zoom);
   camPos.lerp(cp, Math.min(1, dt * 4)); camLook.lerp(tp, Math.min(1, dt * 4));
   camera.position.copy(camPos); camera.lookAt(camLook);
   renderer.render(scene, camera); requestAnimationFrame(tick);
