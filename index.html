@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>EDU456 E-Portfolio | Lokman Hakim bin Yusoff</title>
 <meta name="description" content="EDU456 E-Portfolio of Lokman Hakim bin Yusoff — exploring creativity through artificial intelligence.">
+<meta name="theme-color" content="#080713">
+<meta property="og:type" content="website">
+<meta property="og:title" content="EDU456 E-Portfolio | Lokman Hakim bin Yusoff">
+<meta property="og:description" content="EDU456 E-Portfolio of Lokman Hakim bin Yusoff — exploring creativity through artificial intelligence.">
+<meta property="og:image" content="https://2026135093-lokmanhakim.github.io/edu456-eportfolio/assets/og-image.jpg">
+<meta property="og:url" content="https://2026135093-lokmanhakim.github.io/edu456-eportfolio/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Ctext x='32' y='42' font-family='Arial' font-weight='700' font-size='28' text-anchor='middle' fill='white'%3EAI%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -125,6 +133,10 @@ section.block{padding:96px 0;position:relative}
 .sec-head{margin-bottom:40px}
 .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
 .reveal.in{opacity:1;transform:none}
+@keyframes rise{from{opacity:0;transform:translateY(46px) scale(.96)}}
+.pcard.reveal.in,.tool.reveal.in{animation:rise .85s cubic-bezier(.2,.8,.2,1) var(--d,0s) backwards}
+@keyframes pgin{from{opacity:0;transform:translateY(16px)}}
+#project:not([hidden]),#home:not([hidden]){animation:pgin .5s ease backwards}
 
 /* About */
 .about{display:grid;grid-template-columns:.62fr 1fr;gap:24px;align-items:start;max-width:1040px;margin:0 auto}
@@ -154,7 +166,8 @@ section.block{padding:96px 0;position:relative}
 .pcard{position:relative;display:flex;flex-direction:column;height:100%;text-decoration:none;color:#fff;border-radius:24px;overflow:hidden;
   background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.016));border:1px solid rgba(255,255,255,.09);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 20px 60px -20px rgba(0,0,0,.6);transition:transform .3s ease-out,box-shadow .3s ease-out}
-.pcard:hover,.pcard:focus-visible{transform:translateY(-6px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 30px 80px -30px rgba(168,85,247,.7)}
+.pcard{--rx:0deg;--ry:0deg}
+.pcard:hover,.pcard:focus-visible{transform:translateY(-6px) perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 30px 80px -30px rgba(168,85,247,.7)}
 .pcard .spot{pointer-events:none;position:absolute;inset:0;z-index:2;opacity:0;transition:opacity .3s;background:radial-gradient(400px circle at var(--mx,50%) var(--my,50%),rgba(168,85,247,.16),transparent 45%)}
 .pcard:hover .spot{opacity:1}
 .thumb{position:relative;aspect-ratio:16/10;overflow:hidden;background:#0b0a18}
@@ -688,7 +701,10 @@ const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&
 /* scroll reveal */
 const io = "IntersectionObserver" in window ? new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } }),{threshold:.12}) : null;
 function observeReveals(root=document){
-  $$(".reveal:not(.in)",root).forEach(el=>{ if(io && !reduceMotion.matches) io.observe(el); else el.classList.add("in"); });
+  $$(".reveal:not(.in)",root).forEach((el,i)=>{
+    if(el.matches(".pcard,.tool")) el.style.setProperty("--d", (i%3)*0.12+"s");   // stagger within a row
+    if(io && !reduceMotion.matches) io.observe(el); else el.classList.add("in");
+  });
 }
 
 /* smooth scroll (Lenis, driven by the GSAP ticker) and a scroll progress bar.
@@ -1366,7 +1382,11 @@ $("#cards").addEventListener("pointermove", e=>{
   const card = e.target.closest(".pcard"); if(!card) return;
   const b = card.getBoundingClientRect();
   card.style.setProperty("--mx", (e.clientX-b.left)+"px"); card.style.setProperty("--my", (e.clientY-b.top)+"px");
+  if(e.pointerType==="mouse" && !reduceMotion.matches){   // tilt up to 7 degrees toward the pointer
+    card.style.setProperty("--ry", ((e.clientX-b.left)/b.width-.5)*14+"deg"); card.style.setProperty("--rx", ((e.clientY-b.top)/b.height-.5)*-14+"deg");
+  }
 });
+$("#cards").addEventListener("pointerout", e=>{ const c = e.target.closest(".pcard"); if(c && !c.contains(e.relatedTarget)){ c.style.setProperty("--rx","0deg"); c.style.setProperty("--ry","0deg"); } });
 $("#tools-grid").innerHTML = TOOLS.map(toolHTML).join("");     // used tools first (array order), planned ones carry a badge
 $("#statTools").textContent = String(TOOLS.filter(t=>t.status==="used").length).padStart(2,"0");
 /* marquee band: project names, duplicated once so the loop is seamless */
